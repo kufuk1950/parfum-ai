@@ -10,7 +10,7 @@ import AuthModal from '../../components/AuthModal';
 interface Ingredient {
   id: string;
   name: string;
-  type: 'hammade' | 'esans';
+  type: 'hammade' | 'esans' | 'esans_uret';
   category: string;
   isCustom?: boolean;
   description?: string;
@@ -38,7 +38,10 @@ const DEFAULT_INGREDIENTS = {
     { id: 'h4', name: 'Vanilya Çubuğu', type: 'hammade' as const, category: 'baharat', isCustom: false, description: 'Sıcak ve tatlı vanilya çubuğu', purpose: 'Dip nota, sıcaklık ve derinlik' },
     { id: 'h5', name: 'Sandal Ağacı', type: 'hammade' as const, category: 'odunsu', isCustom: false, description: 'Kremal ve yumuşak sandal ağacı', purpose: 'Dip nota, odunsu karakter' },
     { id: 'h6', name: 'Jasmine Petalleri', type: 'hammade' as const, category: 'çiçek', isCustom: false, description: 'Yoğun ve intoksikan jasmine petalleri', purpose: 'Kalp notası, feminen karakter' },
-    { id: 'h7', name: 'Patchouli Yaprakları', type: 'hammade' as const, category: 'odunsu', isCustom: false, description: 'Toprak kokusu veren patchouli yaprakları', purpose: 'Dip nota, doğal karakter' }
+    { id: 'h7', name: 'Patchouli Yaprakları', type: 'hammade' as const, category: 'odunsu', isCustom: false, description: 'Toprak kokusu veren patchouli yaprakları', purpose: 'Dip nota, doğal karakter' },
+    { id: 'h8', name: 'Cetalox', type: 'hammade' as const, category: 'musk', isCustom: false, description: 'Synthetic ambergris, temiz ve uzun süreli', purpose: 'Dip nota, fiksatif etki' },
+    { id: 'h9', name: 'Cashmeran', type: 'hammade' as const, category: 'musk', isCustom: false, description: 'Kadifemsi ve yumuşak sentetik musk', purpose: 'Dip nota, konfor hissi' },
+    { id: 'h10', name: 'Ambrox Super', type: 'hammade' as const, category: 'musk', isCustom: false, description: 'Güçlü amber akordu, kalıcı', purpose: 'Dip nota, kalıcılık artırıcı' }
   ],
   esanslar: [
     { id: 'e1', name: 'Gül Esansı', type: 'esans' as const, category: 'çiçek', isCustom: false, description: 'Damıtılmış gül esansı, yoğun çiçeksi koku', purpose: 'Ana kalp notası, romantik etki' },
@@ -47,7 +50,17 @@ const DEFAULT_INGREDIENTS = {
     { id: 'e4', name: 'Vanilya Esansı', type: 'esans' as const, category: 'baharat', isCustom: false, description: 'Konsantre vanilya esansı, tatlı ve sıcak', purpose: 'Dip nota, kalıcı tatlılık' },
     { id: 'e5', name: 'Sandal Esansı', type: 'esans' as const, category: 'odunsu', isCustom: false, description: 'Mistik sandal ağacı esansı', purpose: 'Dip nota, meditasyon hissi' },
     { id: 'e6', name: 'Jasmine Esansı', type: 'esans' as const, category: 'çiçek', isCustom: false, description: 'Gece blooming jasmine esansı', purpose: 'Kalp notası, gece parfümü' },
-    { id: 'e7', name: 'Misk Esansı', type: 'esans' as const, category: 'animal', isCustom: false, description: 'Sentetik misk esansı, hayvansal nota', purpose: 'Dip nota, sensüel etki' }
+    { id: 'e7', name: 'Misk Esansı', type: 'esans' as const, category: 'animal', isCustom: false, description: 'Sentetik misk esansı, hayvansal nota', purpose: 'Dip nota, sensüel etki' },
+    { id: 'e8', name: 'Euphoria Esansı', type: 'esans' as const, category: 'marka', isCustom: false, description: 'Calvin Klein Euphoria marka parfüm esansı (hazır)', purpose: 'Ana esans, gourmand karakter' },
+    { id: 'e9', name: 'Miss Dior Esansı', type: 'esans' as const, category: 'marka', isCustom: false, description: 'Dior Miss Dior marka parfüm esansı (hazır)', purpose: 'Ana esans, çiçeksi karakter' },
+    { id: 'e10', name: 'Tom Ford Black Orchid Esansı', type: 'esans' as const, category: 'marka', isCustom: false, description: 'Tom Ford Black Orchid marka parfüm esansı (hazır)', purpose: 'Ana esans, oriental karakter' }
+  ],
+  esans_uret: [
+    { id: 'eu1', name: 'Chanel No 5', type: 'esans_uret' as const, category: 'klasik', isCustom: false, description: 'İkonik klasik parfüm - esansını kendi hammadelerinizle oluşturun', purpose: 'Formülasyon hedefi, aldehit çiçeksi' },
+    { id: 'eu2', name: 'Dior Sauvage', type: 'esans_uret' as const, category: 'modern', isCustom: false, description: 'Modern erkek parfümü - hammadelerle klonlayın', purpose: 'Formülasyon hedefi, fresh spicy' },
+    { id: 'eu3', name: 'Yves Saint Laurent Black Opium', type: 'esans_uret' as const, category: 'gourmand', isCustom: false, description: 'Gourmand kadın parfümü - esansını oluşturun', purpose: 'Formülasyon hedefi, coffee vanilla' },
+    { id: 'eu4', name: 'Creed Aventus', type: 'esans_uret' as const, category: 'niche', isCustom: false, description: 'Lüks niche parfüm - hammadelerle formüle edin', purpose: 'Formülasyon hedefi, fruity smoky' },
+    { id: 'eu5', name: 'Maison Margiela Replica Beach Walk', type: 'esans_uret' as const, category: 'niche', isCustom: false, description: 'Beach Walk esansının formülasyonu', purpose: 'Formülasyon hedefi, solar floral' }
   ]
 };
 
@@ -92,12 +105,16 @@ export default function ParfumAI() {
   // Custom ingredient states
   const [showHammadeInput, setShowHammadeInput] = useState(false);
   const [showEsansInput, setShowEsansInput] = useState(false);
+  const [showEsansUretInput, setShowEsansUretInput] = useState(false);
   const [newHammadeName, setNewHammadeName] = useState('');
   const [newHammadeDescription, setNewHammadeDescription] = useState('');
   const [newHammadePurpose, setNewHammadePurpose] = useState('');
   const [newEsansName, setNewEsansName] = useState('');
   const [newEsansDescription, setNewEsansDescription] = useState('');
   const [newEsansPurpose, setNewEsansPurpose] = useState('');
+  const [newEsansUretName, setNewEsansUretName] = useState('');
+  const [newEsansUretDescription, setNewEsansUretDescription] = useState('');
+  const [newEsansUretPurpose, setNewEsansUretPurpose] = useState('');
 
   // Client-side hydration
   const [isClient, setIsClient] = useState(false);
@@ -166,6 +183,10 @@ export default function ParfumAI() {
     esanslar: [
       ...DEFAULT_INGREDIENTS.esanslar.filter(ing => !hiddenIngredients.includes(ing.id)), 
       ...customIngredients.filter(ing => ing.type === 'esans')
+    ],
+    esans_uret: [
+      ...DEFAULT_INGREDIENTS.esans_uret.filter(ing => !hiddenIngredients.includes(ing.id)), 
+      ...customIngredients.filter(ing => ing.type === 'esans_uret')
     ]
   };
 
@@ -220,6 +241,30 @@ export default function ParfumAI() {
         setNewEsansDescription('');
         setNewEsansPurpose('');
         setShowEsansInput(false);
+      } catch (error) {
+        console.error('Error adding custom ingredient:', error);
+        alert('Malzeme eklenirken bir hata oluştu.');
+      }
+    }
+  };
+
+  const addCustomEsansUret = async () => {
+    if (newEsansUretName.trim()) {
+      const newIngredient = {
+        name: newEsansUretName.trim(),
+        type: 'esans_uret' as const,
+        category: 'özel',
+        isCustom: true,
+        description: newEsansUretDescription.trim() || 'Özel marka parfüm formülasyonu',
+        purpose: newEsansUretPurpose.trim() || 'Formülasyon hedefi'
+      };
+
+      try {
+        await addCustomIngredientToStore(newIngredient);
+        setNewEsansUretName('');
+        setNewEsansUretDescription('');
+        setNewEsansUretPurpose('');
+        setShowEsansUretInput(false);
       } catch (error) {
         console.error('Error adding custom ingredient:', error);
         alert('Malzeme eklenirken bir hata oluştu.');
@@ -523,6 +568,7 @@ export default function ParfumAI() {
   // Seçilen malzemeleri kategoriye göre ayır
   const selectedHammadeler = selectedIngredients.filter(ing => ing.type === 'hammade');
   const selectedEsanslar = selectedIngredients.filter(ing => ing.type === 'esans');
+  const selectedEsansUret = selectedIngredients.filter(ing => ing.type === 'esans_uret');
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-purple-50 to-pink-50">
@@ -890,6 +936,108 @@ export default function ParfumAI() {
                 )}
               </div>
 
+              {/* Esans Üret */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-700">Esans Üret</h3>
+                    <p className="text-sm text-gray-500">Marka parfümlerini hammadelerinizle klonlayın</p>
+                  </div>
+                  <button
+                    onClick={() => setShowEsansUretInput(!showEsansUretInput)}
+                    className="flex items-center gap-2 px-3 py-1 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Ekle
+                  </button>
+                </div>
+                
+                {showEsansUretInput && (
+                  <div className="mb-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={newEsansUretName}
+                        onChange={(e) => setNewEsansUretName(e.target.value)}
+                        placeholder="Marka parfüm adı girin (örn: Chanel No 5, Dior Sauvage)"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-gray-900"
+                      />
+                      <input
+                        type="text"
+                        value={newEsansUretDescription}
+                        onChange={(e) => setNewEsansUretDescription(e.target.value)}
+                        placeholder="Açıklama (örn: İkonik klasik parfüm - hammadelerle klonlayın)"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-gray-900"
+                      />
+                      <input
+                        type="text"
+                        value={newEsansUretPurpose}
+                        onChange={(e) => setNewEsansUretPurpose(e.target.value)}
+                        placeholder="Karakter (örn: Formülasyon hedefi, aldehit çiçeksi)"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white text-gray-900"
+                        onKeyPress={(e) => e.key === 'Enter' && addCustomEsansUret()}
+                      />
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={addCustomEsansUret}
+                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      >
+                        Ekle
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowEsansUretInput(false);
+                          setNewEsansUretName('');
+                          setNewEsansUretDescription('');
+                          setNewEsansUretPurpose('');
+                        }}
+                        className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-colors"
+                      >
+                        İptal
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex flex-wrap gap-3">
+                  {allIngredients.esans_uret.map((ingredient) => (
+                    <div key={ingredient.id} className="relative group">
+                      <div className="flex items-center gap-1 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
+                        <button
+                          onClick={() => addIngredient(ingredient)}
+                          className="flex items-center gap-1 text-orange-800 hover:text-orange-900"
+                        >
+                          <Plus className="w-3 h-3" />
+                          {ingredient.name}
+                        </button>
+                        
+                        {/* Info tooltip */}
+                        {ingredient.description && (
+                          <div className="relative">
+                            <Info className="w-3 h-3 text-orange-600 cursor-help" />
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-64 z-50 pointer-events-none">
+                              <div className="font-semibold mb-1">{ingredient.description}</div>
+                              <div className="text-gray-300">{ingredient.purpose}</div>
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-b-gray-800"></div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Silme butonu */}
+                        <button
+                          onClick={() => ingredient.isCustom ? deleteCustomIngredient(ingredient.id) : deleteDefaultIngredient(ingredient.id)}
+                          className="w-4 h-4 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Sil"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Seçilen Malzemeler - Kategorilere Ayrılmış */}
               {selectedIngredients.length > 0 && (
                 <div>
@@ -920,13 +1068,36 @@ export default function ParfumAI() {
 
                   {/* Seçilen Esanslar */}
                   {selectedEsanslar.length > 0 && (
-                    <div>
+                    <div className="mb-4">
                       <h4 className="text-md font-medium text-gray-600 mb-2">Esanslar ({selectedEsanslar.length})</h4>
                       <div className="flex flex-wrap gap-2">
                         {selectedEsanslar.map((ingredient) => (
                           <span
                             key={ingredient.id}
                             className="px-3 py-1 bg-blue-200 text-blue-800 rounded-full text-sm flex items-center gap-1"
+                          >
+                            {ingredient.name}
+                            <button
+                              onClick={() => removeIngredient(ingredient.id)}
+                              className="ml-1 hover:text-red-600"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seçilen Esans Üret */}
+                  {selectedEsansUret.length > 0 && (
+                    <div>
+                      <h4 className="text-md font-medium text-gray-600 mb-2">Esans Üret ({selectedEsansUret.length})</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedEsansUret.map((ingredient) => (
+                          <span
+                            key={ingredient.id}
+                            className="px-3 py-1 bg-orange-200 text-orange-800 rounded-full text-sm flex items-center gap-1"
                           >
                             {ingredient.name}
                             <button

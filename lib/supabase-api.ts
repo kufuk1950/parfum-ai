@@ -10,7 +10,7 @@ export type CustomIngredientInsert = Database['public']['Tables']['custom_ingred
 export interface LocalIngredient {
   id: string
   name: string
-  type: 'hammade' | 'esans'
+  type: 'hammade' | 'esans' | 'esans_uret'
   category: string
   isCustom?: boolean
   description?: string
@@ -149,7 +149,7 @@ export const getCustomIngredients = async (): Promise<LocalIngredient[]> => {
   return data.map(ingredient => ({
     id: ingredient.id,
     name: ingredient.name,
-    type: ingredient.type as 'hammade' | 'esans',
+    type: ingredient.type as 'hammade' | 'esans' | 'esans_uret',
     category: ingredient.category,
     isCustom: ingredient.is_custom,
     description: ingredient.description || undefined,
@@ -183,7 +183,7 @@ export const saveCustomIngredient = async (ingredient: Omit<LocalIngredient, 'id
   return {
     id: data.id,
     name: data.name,
-    type: data.type as 'hammade' | 'esans',
+    type: data.type as 'hammade' | 'esans' | 'esans_uret',
     category: data.category,
     isCustom: data.is_custom,
     description: data.description || undefined,

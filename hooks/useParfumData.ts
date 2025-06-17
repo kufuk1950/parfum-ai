@@ -8,7 +8,7 @@ import * as SupabaseAPI from '../lib/supabase-api'
 export interface Ingredient {
   id: string
   name: string
-  type: 'hammade' | 'esans'
+  type: 'hammade' | 'esans' | 'esans_uret'
   category: string
   isCustom?: boolean
   description?: string

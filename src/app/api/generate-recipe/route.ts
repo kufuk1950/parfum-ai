@@ -4,7 +4,7 @@ import OpenAI from 'openai';
 interface Ingredient {
   id: string;
   name: string;
-  type: 'hammade' | 'esans';
+  type: 'hammade' | 'esans' | 'esans_uret';
   category: string;
 }
 
@@ -25,6 +25,7 @@ function generateDemoRecipe(
 ): string {
   const hammadeler = ingredients.filter(ing => ing.type === 'hammade');
   const esanslar = ingredients.filter(ing => ing.type === 'esans');
+  const esansUret = ingredients.filter(ing => ing.type === 'esans_uret');
   
   const seasonChars = {
     ilkbahar: 'taze ve çiçeksi',
@@ -186,9 +187,11 @@ export async function POST(request: NextRequest) {
     // Malzeme listesini hazırla
     const hammadeler = ingredients.filter(ing => ing.type === 'hammade').map(ing => ing.name);
     const esanslar = ingredients.filter(ing => ing.type === 'esans').map(ing => ing.name);
+    const esansUret = ingredients.filter(ing => ing.type === 'esans_uret').map(ing => ing.name);
 
     console.log('🌿 Hammadeler:', hammadeler.length, hammadeler);
-    console.log('💧 Marka Parfüm Esansları:', esanslar.length, esanslar);
+    console.log('💧 Hazır Marka Parfüm Esansları:', esanslar.length, esanslar);
+    console.log('🧪 Üretilecek Marka Parfüm Esansları:', esansUret.length, esansUret);
 
     // Mevsim özelliklerini belirle
     const seasonCharacteristics = {
@@ -219,7 +222,8 @@ MARKA PARFÜM PROJESI DETAYLARI:
 
 MEVCUT MALZEME ENVANTERİ:
 ${hammadeler.length > 0 ? `🌿 DESTEKLEYICI HAMMADELER: ${hammadeler.join(', ')}` : '🌿 HAMMADELER: Yok'}
-${esanslar.length > 0 ? `🌸 MARKA PARFÜM ESANSLARI: ${esanslar.join(', ')}` : '💧 ESANSLAR: Yok'}
+${esanslar.length > 0 ? `🌸 HAZIR MARKA PARFÜM ESANSLARI: ${esanslar.join(', ')}` : '🌸 HAZIR ESANSLAR: Yok'}
+${esansUret.length > 0 ? `🧪 ÜRETİLECEK MARKA PARFÜMLER: ${esansUret.join(', ')}` : '🧪 ÜRETIM HEDEFİ: Yok'}
 
 MARKA PARFÜM KLONLAMA GEREKSİNİMLERİ:
 - Konsantrasyon: EXTRAIT DE PARFUM (25% esans, 10% hammade, 65% alkol)
@@ -228,6 +232,11 @@ MARKA PARFÜM KLONLAMA GEREKSİNİMLERİ:
 - Matematik %100 doğru olmalı
 - Kalıcılık: Minimum 8-12 saat (marka parfüm seviyesi)
 - Sillaj (Yayılım): Yüksek seviye
+
+MALZEME TİPLERİ ve KULLANIM MANTIĞI:
+1. HAZIR MARKA PARFÜM ESANSLARI: Bu esanslar zaten hazır, sadece miktarını belirt (örn: 5ml Euphoria Esansı)
+2. ÜRETİLECEK MARKA PARFÜMLER: Bu parfümlerin esansını hammadelerle nasıl oluşturacağını detayını anlat
+3. DESTEKLEYICI HAMMADELER: Her ikisinde de destek olarak kullan
 
 MATEMATİK KURALLARI (${perfumeVolume}ml için):
 1. Marka Esanslar Toplamı: ${Math.round(perfumeVolume * 0.25)}ml (%25)
@@ -339,13 +348,13 @@ Türkçe yanıtla. Her ölçümü ML olarak net ver. Matematik %100 doğru olsun
 
     console.log('🚀 OpenAI API çağrısı yapılıyor...');
     console.log('📊 Prompt hazırlandı, character count:', prompt.length);
-    console.log('🎯 Model: gpt-3.5-turbo');
+    console.log('🎯 Model: gpt-4o-mini');
     
     try {
       console.log('⏳ OpenAI API request başlatılıyor...');
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
