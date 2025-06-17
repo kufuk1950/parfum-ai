@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X, Lock, User, Sparkles } from 'lucide-react'
+import { useParfumData } from '../hooks/useParfumData'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -15,9 +16,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Hardcoded credentials
-  const ADMIN_USERNAME = 'adminufuk'
-  const ADMIN_PASSWORD = 'Ufuk12345K'
+  // useParfumData hook'undan signIn fonksiyonunu al
+  const { signIn } = useParfumData()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,17 +25,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     setError('')
 
     try {
-      // Hardcoded authentication
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        // Store authentication in sessionStorage
-        sessionStorage.setItem('parfum-auth', 'authenticated')
-        
+      const result = await signIn(username, password)
+      
+      if (result.success) {
         onSuccess()
         onClose()
         setUsername('')
         setPassword('')
       } else {
-        throw new Error('Kullanıcı adı veya şifre hatalı!')
+        setError(result.error || 'Giriş yapılamadı')
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Giriş yapılamadı'
@@ -86,7 +84,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500"
                 placeholder="Kullanıcı adınızı girin"
               />
             </div>
@@ -103,7 +101,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500"
                 placeholder="Şifrenizi girin"
               />
             </div>

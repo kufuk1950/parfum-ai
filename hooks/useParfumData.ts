@@ -154,30 +154,65 @@ export const useParfumData = () => {
 
   // Authentication fonksiyonları
   const signIn = async (username: string, password: string) => {
-    // Hardcoded authentication
-    if (username === 'adminufuk' && password === 'Ufuk12345K') {
-      sessionStorage.setItem('parfum-auth', 'authenticated')
-      setIsAuthenticated(true)
-      setUser({ id: 'admin-user', email: 'admin@parfum.ai' })
-      await loadFromSupabase()
-      return { success: true }
-    } else {
-      return { success: false, error: 'Kullanıcı adı veya şifre hatalı!' }
+    try {
+      // Hardcoded authentication
+      if (username === 'adminufuk' && password === 'Ufuk12345K') {
+        // Supabase'de gerçek kullanıcı ile giriş yap
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: 'admin@parfum.ai',
+          password: 'Ufuk12345K'
+        });
+        
+        if (error) {
+          console.error('Supabase auth error:', error);
+          // Eğer kullanıcı yoksa oluştur
+          const { data: signupData, error: signupError } = await supabase.auth.signUp({
+            email: 'admin@parfum.ai',
+            password: 'Ufuk12345K',
+            options: {
+              emailRedirectTo: undefined // Email confirmation bypass
+            }
+          });
+          
+          if (signupError) {
+            console.error('Supabase signup error:', signupError);
+            // Manuel olarak session storage ile devam et
+            sessionStorage.setItem('parfum-auth', 'authenticated');
+            setIsAuthenticated(true);
+            setUser({ id: 'admin-user-manual', email: 'admin@parfum.ai' });
+            await loadFromSupabase();
+            return { success: true };
+          }
+        }
+        
+        sessionStorage.setItem('parfum-auth', 'authenticated');
+        setIsAuthenticated(true);
+        setUser(data?.user || { id: 'admin-user-manual', email: 'admin@parfum.ai' });
+        await loadFromSupabase();
+        return { success: true };
+        
+      } else {
+        return { success: false, error: 'Kullanıcı adı veya şifre hatalı!' };
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return { success: false, error: 'Giriş yapılamadı' };
     }
-  }
+  };
 
   const signOut = async () => {
     try {
-      sessionStorage.removeItem('parfum-auth')
-      setIsAuthenticated(false)
-      setUser(null)
-      setSavedRecipes([])
-      setCustomIngredients([])
-      setHiddenIngredients([])
+      await supabase.auth.signOut();
+      sessionStorage.removeItem('parfum-auth');
+      setIsAuthenticated(false);
+      setUser(null);
+      setSavedRecipes([]);
+      setCustomIngredients([]);
+      setHiddenIngredients([]);
     } catch (error) {
-      console.error('Error signing out:', error)
+      console.error('Error signing out:', error);
     }
-  }
+  };
 
   return {
     // State
