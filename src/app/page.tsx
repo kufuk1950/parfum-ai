@@ -25,6 +25,7 @@ interface Recipe {
   season: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış';
   dominantScent: string;
   recipe: string;
+  perfumeVolume?: 50 | 100;
   createdAt: Date;
 }
 
@@ -82,6 +83,7 @@ export default function ParfumAI() {
   const [gender, setGender] = useState<'kadın' | 'erkek' | 'unisex'>('kadın');
   const [season, setSeason] = useState<'ilkbahar' | 'yaz' | 'sonbahar' | 'kış'>('ilkbahar');
   const [dominantScent, setDominantScent] = useState('');
+  const [perfumeVolume, setPerfumeVolume] = useState<50 | 100>(50);
   const [generatedRecipe, setGeneratedRecipe] = useState('');
   const [newRecipeName, setNewRecipeName] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -134,7 +136,7 @@ export default function ParfumAI() {
 
   // Authentication required - show login modal
   if (!isAuthenticated) {
-    return (
+  return (
       <div className="flex h-screen bg-gradient-to-br from-purple-50 to-pink-50 items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -354,6 +356,7 @@ export default function ParfumAI() {
           gender,
           season,
           dominantScent,
+          perfumeVolume,
         }),
       });
 
@@ -370,10 +373,11 @@ export default function ParfumAI() {
         setGender('kadın');
         setSeason('ilkbahar');
         setDominantScent('');
+        setPerfumeVolume(50);
       }, 1000); // 1 saniye sonra temizle ki kullanıcı sonucu görebilsin
       
     } catch (error) {
-      console.error('Reçete üretilirken hata:', error);
+      console.error('💥 Reçete üretilirken hata:', error);
       alert('Reçete üretilirken bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setIsGenerating(false);
@@ -382,7 +386,7 @@ export default function ParfumAI() {
 
   const saveRecipe = async () => {
     if (!generatedRecipe || !newRecipeName.trim()) {
-      alert('Lütfen reçete adı girin ve bir reçete üreting!');
+      alert('Lütfen reçete adı girin ve bir reçete üretip!');
       return;
     }
 
@@ -393,7 +397,8 @@ export default function ParfumAI() {
         gender,
         season,
         dominantScent,
-        recipe: generatedRecipe
+        recipe: generatedRecipe,
+        perfumeVolume
       });
       
       setNewRecipeName('');
@@ -917,10 +922,9 @@ export default function ParfumAI() {
 
             {/* Tercihler */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-6">Parfüm Tercihleri</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-6">Tercihler</h2>
               
               <div className="grid md:grid-cols-3 gap-6">
-                {/* Cinsiyet */}
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-2">Cinsiyet</label>
                   <select
@@ -934,7 +938,6 @@ export default function ParfumAI() {
                   </select>
                 </div>
 
-                {/* Mevsim */}
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-2">Mevsim</label>
                   <select
@@ -949,7 +952,6 @@ export default function ParfumAI() {
                   </select>
                 </div>
 
-                {/* Baskın Koku */}
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-2">Baskın Koku</label>
                   <select
@@ -965,6 +967,40 @@ export default function ParfumAI() {
                 </div>
               </div>
 
+              {/* Parfüm Hacmi Seçimi */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-800 mb-3">Parfüm Hacmi</label>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setPerfumeVolume(50)}
+                    className={`px-6 py-3 rounded-lg font-semibold border-2 transition-all flex items-center gap-2 ${
+                      perfumeVolume === 50
+                        ? 'bg-purple-600 text-white border-purple-600'
+                        : 'bg-white text-purple-600 border-purple-600 hover:bg-purple-50'
+                    }`}
+                  >
+                    <span className="text-lg">💧</span>
+                    50ml
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPerfumeVolume(100)}
+                    className={`px-6 py-3 rounded-lg font-semibold border-2 transition-all flex items-center gap-2 ${
+                      perfumeVolume === 100
+                        ? 'bg-purple-600 text-white border-purple-600'
+                        : 'bg-white text-purple-600 border-purple-600 hover:bg-purple-50'
+                    }`}
+                  >
+                    <span className="text-lg">🧪</span>
+                    100ml
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">
+                  Seçilen hacme göre malzeme miktarları otomatik hesaplanacak
+                </p>
+              </div>
+
               <button
                 onClick={generateRecipe}
                 disabled={isGenerating || selectedIngredients.length === 0}
@@ -978,7 +1014,7 @@ export default function ParfumAI() {
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5" />
-                    Reçete Üret
+                    {perfumeVolume}ml Reçete Üret
                   </>
                 )}
               </button>
@@ -1068,6 +1104,26 @@ export default function ParfumAI() {
             </div>
             
             <div className="p-6">
+              {/* Reçete Bilgileri */}
+              <div className="mb-6 grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600">Cinsiyet:</span>
+                  <span className="font-semibold text-gray-800 ml-2">{selectedRecipeForView.gender}</span>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600">Mevsim:</span>
+                  <span className="font-semibold text-gray-800 ml-2">{selectedRecipeForView.season}</span>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600">Baskın Koku:</span>
+                  <span className="font-semibold text-gray-800 ml-2">{selectedRecipeForView.dominantScent || 'Belirtilmemiş'}</span>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <span className="text-gray-600">Hacim:</span>
+                  <span className="font-semibold text-gray-800 ml-2">{selectedRecipeForView.perfumeVolume || 50}ml</span>
+                </div>
+              </div>
+
               {/* Malzemeler */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Kullanılan Malzemeler</h3>

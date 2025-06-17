@@ -23,6 +23,7 @@ export interface Recipe {
   season: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış'
   dominantScent: string
   recipe: string
+  perfumeVolume?: 50 | 100
   createdAt: Date
 }
 

@@ -13,13 +13,15 @@ interface RequestBody {
   gender: 'kadın' | 'erkek' | 'unisex';
   season: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış';
   dominantScent: string;
+  perfumeVolume: 50 | 100;
 }
 
 function generateDemoRecipe(
   ingredients: Ingredient[], 
   gender: 'kadın' | 'erkek' | 'unisex', 
   season: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış', 
-  dominantScent: string
+  dominantScent: string,
+  perfumeVolume: 50 | 100
 ): string {
   const hammadeler = ingredients.filter(ing => ing.type === 'hammade');
   const esanslar = ingredients.filter(ing => ing.type === 'esans');
@@ -37,25 +39,40 @@ function generateDemoRecipe(
     unisex: 'dengeli ve modern'
   };
 
-  return `🌸 PROFESYONEL PARFÜM REÇETESİ 🌸
+  // Matematik hesaplamaları - SU YOK!
+  const totalVolume = perfumeVolume;
+  const esansVolume = Math.round(totalVolume * 0.25); // %25 esans
+  const hammadeVolume = Math.round(totalVolume * 0.10); // %10 hammade
+  const alcoholVolume = totalVolume - esansVolume - hammadeVolume; // Geri kalan alkol
 
-📋 MALZEME LİSTESİ VE ORANLAR:
+  // Malzeme başına dağılım
+  const esansPerItem = esanslar.length > 0 ? Math.round(esansVolume / esanslar.length * 10) / 10 : 0;
+  const hammadePerItem = hammadeler.length > 0 ? Math.round(hammadeVolume / hammadeler.length * 10) / 10 : 0;
 
-🌸 MARKA PARFÜM ESANSLARI (Heart & Base Notes - %60):
-${esanslar.map(ing => `• ${ing.name} - 4ml`).join('\n') || '• Temel esans bulunmuyor'}
+  return `🏆 MARKA PARFÜM KLONU REÇETESİ (${totalVolume}ml) 🏆
 
-🌿 DESTEKLEYICI HAMMADELER (Top Notes - %30):
-${hammadeler.map(ing => `• ${ing.name} - 3ml`).join('\n') || '• Temel hammade bulunmuyor'}
+📊 KONSANTRASYON ANALİZİ:
+• Marka Esans Oranı: %25 (${esansVolume}ml)
+• Hammade Destek Oranı: %10 (${hammadeVolume}ml)
+• Alkol Oranı: %65 (${alcoholVolume}ml)
+• Su Oranı: %0 (Su kullanılmıyor)
 
-🧪 ÇÖZÜCÜ (Base - %10):
-• Etil alkol (%96) - 25ml
-• Distile su - 5ml
+📋 DETAYLI MALZEME LİSTESİ (${totalVolume}ml için):
+
+🌸 MARKA PARFÜM ESANSLARI (${esansVolume}ml toplam):
+${esanslar.map(ing => `• ${ing.name} - ${esansPerItem}ml`).join('\n') || '• Marka esans seçilmedi'}
+
+🌿 DESTEKLEYICI HAMMADELER (${hammadeVolume}ml toplam):
+${hammadeler.map(ing => `• ${ing.name} - ${hammadePerItem}ml`).join('\n') || '• Hammade seçilmedi'}
+
+🧪 ÇÖZÜCÜ:
+• Etil alkol (%96) - ${alcoholVolume}ml
 
 🔬 MARKA PARFÜM HAZIRLAMA ADIMLARİ:
 
 1. 📊 ÖLÇÜM AŞAMASI:
    - Tüm malzemeleri hassas terazide ölçün
-   - Cam malzemeler kullanın (plastik kokular absorbe eder)
+   - Cam malzemeler kullanın
 
 2. 💫 MARKA ESANS KARIŞIMI:
    - Önce marka parfüm esanslarını karıştırın
@@ -64,8 +81,7 @@ ${hammadeler.map(ing => `• ${ing.name} - 3ml`).join('\n') || '• Temel hammad
    - 5 dakika karıştırın
 
 3. 🕐 OLGUNLAŞTIRMA:
-   - Kapalı cam şişede 48 saat bekletin
-   - Distile suyu son olarak ekleyin
+   - Kapalı cam şişede 2-4 hafta bekletin
    - Hafifçe çalkalayın
 
 💡 MARKA PARFÜM TAVSİYELERİ:
@@ -75,23 +91,17 @@ ${hammadeler.map(ing => `• ${ing.name} - 3ml`).join('\n') || '• Temel hammad
 • 🌞 IŞIK: Direkt güneş ışığından uzak tutun
 • 📦 SAKLAMA: Koyu renkli cam şişe kullanın
 
-⏰ OLGUNLAŞTIRMA TAKVİMİ:
-
-• 🗓️ 1. GÜN: Karışım tamamlanır
-• 🗓️ 3. GÜN: İlk koku dengesi oluşur  
-• 🗓️ 1. HAFTA: Notalar birleşmeye başlar
-• 🗓️ 2-4 HAFTA: Tam olgunluk (önerilen)
-
 🎯 BEKLENİLEN SONUÇ:
 
 Bu reçete ${genderChars[gender]} karakterde, ${season} mevsimi için ${seasonChars[season]} bir parfüm üretecektir.
 
 ${dominantScent ? `🌟 Baskın koku profili: ${dominantScent}` : ''}
 🔢 Toplam malzeme sayısı: ${ingredients.length}
-⏱️ Kalıcılık: 6-8 saat  
-🌊 Sillaj: Orta seviye
+⏱️ Kalıcılık: 8-12 saat  
+🌊 Sillaj: Yüksek seviye
+📏 Toplam hacim: ${totalVolume}ml
 
-📝 NOT: Bu reçete marka parfüm esansları kullanılarak hazırlanmıştır. 
+📝 NOT: Matematik %100 doğru - Su kullanılmıyor, sadece alkol çözücü!
 OpenAI API sorunu nedeniyle demo versiyon gösterilmektedir.`;
 }
 
@@ -101,11 +111,12 @@ export async function POST(request: NextRequest) {
   let gender: 'kadın' | 'erkek' | 'unisex' = 'unisex';
   let season: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış' = 'ilkbahar';
   let dominantScent = '';
+  let perfumeVolume: 50 | 100 = 50;
   
   try {
     const body: RequestBody = await request.json();
     console.log('📝 Request body:', JSON.stringify(body, null, 2));
-    ({ ingredients, gender, season, dominantScent } = body);
+    ({ ingredients, gender, season, dominantScent, perfumeVolume } = body);
 
     if (!ingredients || ingredients.length === 0) {
       console.log('❌ Malzeme listesi boş!');
@@ -122,7 +133,7 @@ export async function POST(request: NextRequest) {
     
     if (!apiKey || apiKey.trim() === '' || apiKey === 'your-openai-api-key-here') {
       console.log('❌ OpenAI API Key invalid, returning demo recipe');
-      return NextResponse.json({ recipe: generateDemoRecipe(ingredients, gender, season, dominantScent) });
+      return NextResponse.json({ recipe: generateDemoRecipe(ingredients, gender, season, dominantScent, perfumeVolume) });
     }
 
     console.log('🤖 OpenAI client oluşturuluyor...');
@@ -163,76 +174,83 @@ MARKA PARFÜM PROJESI DETAYLARI:
 🌸 Baskın Koku Profili: ${dominantScent}
 🎪 Karakter: ${genderCharacteristics[gender]}
 🌿 Mevsim Özelliği: ${seasonCharacteristics[season]}
+📏 HEDEF HACİM: ${perfumeVolume}ml
 
 MEVCUT MALZEME ENVANTERİ:
 ${hammadeler.length > 0 ? `🌿 DESTEKLEYICI HAMMADELER: ${hammadeler.join(', ')}` : '🌿 HAMMADELER: Yok'}
 ${esanslar.length > 0 ? `🌸 MARKA PARFÜM ESANSLARI: ${esanslar.join(', ')}` : '💧 ESANSLAR: Yok'}
 
 MARKA PARFÜM KLONLAMA GEREKSİNİMLERİ:
-- Konsantrasyon: EXTRAIT DE PARFUM (20-40% esans)
-- Orijinal karakter korunmalı
-- Kalıcılık: Minimum 12+ saat (marka parfüm seviyesi)
-- Sillaj (Yayılım): Yüksek, 1-2 metre mesafe
-- Kalite: Orijinal marka parfüme yakın seviye
+- Konsantrasyon: EXTRAIT DE PARFUM (25% esans, 10% hammade, 65% alkol)
+- Toplam Hacim: ${perfumeVolume}ml (kesin)
+- SU KULLANMA! Sadece alkol çözücü
+- Matematik %100 doğru olmalı
+- Kalıcılık: Minimum 8-12 saat (marka parfüm seviyesi)
+- Sillaj (Yayılım): Yüksek seviye
+
+MATEMATİK KURALLARI (${perfumeVolume}ml için):
+1. Marka Esanslar Toplamı: ${Math.round(perfumeVolume * 0.25)}ml (%25)
+2. Hammadeler Toplamı: ${Math.round(perfumeVolume * 0.10)}ml (%10)
+3. Etil Alkol: ${perfumeVolume - Math.round(perfumeVolume * 0.25) - Math.round(perfumeVolume * 0.10)}ml (%65)
+4. Su: 0ml (HİÇ KULLANMA!)
+5. TOPLAM: Tam ${perfumeVolume}ml olmalı
 
 MARKA PARFÜM REVERSİNG KURALLARI:
 1. Seçilen marka parfüm esanslarının orijinal kompozisyonunu analiz et
 2. Bu parfümlerin karakteristik özelliklerini koruyacak formülasyon yap
 3. Destekleyici hammadelerle orijinal nota piramidini destekle
-4. Top-Heart-Base yapısını marka parfümün orijinaline uygun kur
+4. Matematiği kesinlikle doğru yap - toplam ${perfumeVolume}ml
 
 Lütfen aşağıdaki profesyonel formatta MARKA PARFÜM KLONLAMA reçetesi hazırla:
 
-🏆 MARKA PARFÜM KLONU REÇETESİ 🏆
+🏆 MARKA PARFÜM KLONU REÇETESİ (${perfumeVolume}ml) 🏆
 
 📊 KONSANTRASYON ANALİZİ:
-• Marka Esans Oranı: [%25-40 arası belirt]
-• Hammade Destek Oranı: [%10-20 arası belirt]  
-• Alkol Oranı: [%40-60 arası belirt]
-• Su Oranı: [%5-15 arası belirt]
+• Marka Esans Oranı: %25 (${Math.round(perfumeVolume * 0.25)}ml)
+• Hammade Destek Oranı: %10 (${Math.round(perfumeVolume * 0.10)}ml)
+• Alkol Oranı: %65 (${perfumeVolume - Math.round(perfumeVolume * 0.25) - Math.round(perfumeVolume * 0.10)}ml)
+• Su Oranı: %0 (Su kullanılmıyor)
 
-📋 DETAYLI MALZEME LİSTESİ VE ÖLÇÜMLER:
+📋 DETAYLI MALZEME LİSTESİ (${perfumeVolume}ml için):
 
-🔺 TOP NOTES (%20-30) - İlk 15 dakika:
-[Her malzemeyi ml/gram cinsinden, marka parfümün üst notalarını yakalayacak şekilde]
+🌸 MARKA PARFÜM ESANSLARI (${Math.round(perfumeVolume * 0.25)}ml toplam):
+[Her marka esansını ml cinsinden, toplamı ${Math.round(perfumeVolume * 0.25)}ml olacak şekilde]
 
-💖 HEART NOTES (%40-50) - 1-6 saat:
-[Marka parfüm esanslarını burada kullan, orijinal kalp notalarını koru]
+🌿 DESTEKLEYICI HAMMADELER (${Math.round(perfumeVolume * 0.10)}ml toplam):
+[Her hammadeyi ml cinsinden, toplamı ${Math.round(perfumeVolume * 0.10)}ml olacak şekilde]
 
-🏛️ BASE NOTES (%20-30) - 6+ saat:
-[Destekleyici hammadelerle marka parfümün dip notalarını güçlendir]
-
-🧪 ÇÖZÜCÜ VE SABITLEYICI:
-• Etil Alkol (96%): [X]ml
-• Distile Su: [X]ml
-• Fiksatör: [X]ml
+🧪 ÇÖZÜCÜ:
+• Etil Alkol (96%): ${perfumeVolume - Math.round(perfumeVolume * 0.25) - Math.round(perfumeVolume * 0.10)}ml
 
 🔬 MARKA PARFÜM KLONLAMA TEKNİĞİ:
 
 ADIM 1 - Marka Esans Hazırlığı:
 [Marka parfüm esanslarının doğru oranlarla karıştırılması]
 
-ADIM 2 - Nota Piramidi Kurulumu:
-[Orijinal parfümün nota yapısını koruyacak hammade eklenmesi]
+ADIM 2 - Hammade Desteği:
+[Destekleyici hammadelerin eklenmesi]
 
-ADIM 3 - Karakteristik Koruma:
-[Marka parfümün ayırt edici özelliklerinin yakalanması]
+ADIM 3 - Alkol Entegrasyonu:
+[Etil alkolün dikkatli eklenmesi]
 
 ADIM 4 - Olgunlaştırma:
-[Marka parfüm kalitesinde olgunlaştırma süreci]
+[2-4 hafta olgunlaştırma süreci]
 
 💎 MASTER PARFÜMÖR MARKA KLONLAMA TAVSİYELERİ:
 [Seçilen marka parfümlerin karakteristiğini korumak için özel teknikler]
 
 📈 BEKLENEN MARKA PARFÜM PERFORMANSİ:
-🕐 Kalıcılık: Orijinale yakın performans
-📏 Sillaj: Marka parfüm seviyesi
+🕐 Kalıcılık: 8-12 saat
+📏 Sillaj: Yüksek seviye
 👃 Karakter Benzerliği: %85-95 oranında
+📏 Toplam hacim: ${perfumeVolume}ml
 
 🎯 MARKA PARFÜM KARAKTER ANALİZİ:
 [Seçilen esansların hangi marka parfüm karakteristiklerini yansıttığı]
 
-Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Marka parfüm kalitesinde profesyonel reçete hazırla.
+UYARI: Matematik kesinlikle doğru olmalı! Toplam ${perfumeVolume}ml, su yok!
+
+Türkçe yanıtla. Her ölçümü ML olarak net ver. Matematik %100 doğru olsun.
 `;
 
     console.log('🚀 OpenAI API çağrısı yapılıyor...');
@@ -267,7 +285,7 @@ Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Marka parfüm kalitesi
       // OpenAI API hatası durumunda demo reçete döndür
       console.log('❌ OpenAI API failed, returning demo recipe');
       return NextResponse.json({ 
-        recipe: generateDemoRecipe(ingredients, gender, season, dominantScent)
+        recipe: generateDemoRecipe(ingredients, gender, season, dominantScent, perfumeVolume)
       });
     }
 
@@ -279,7 +297,7 @@ Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Marka parfüm kalitesi
     if (apiError?.status === 429 || apiError?.code === 'insufficient_quota') {
       console.log('❌ OpenAI quota exceeded, returning demo recipe');
       return NextResponse.json({ 
-        recipe: generateDemoRecipe(ingredients, gender, season, dominantScent)
+        recipe: generateDemoRecipe(ingredients, gender, season, dominantScent, perfumeVolume)
       });
     }
     
