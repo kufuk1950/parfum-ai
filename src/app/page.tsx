@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Plus, Trash2, Sparkles, Save, FlaskConical, Eye, Info, Image } from 'lucide-react';
+import { Menu, X, Plus, Trash2, Sparkles, Save, FlaskConical, Eye, Info, Image, LogIn, LogOut, User, Cloud, HardDrive } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { Transition } from '@headlessui/react';
+import { useParfumData } from '../../hooks/useParfumData';
+import AuthModal from '../../components/AuthModal';
 
 interface Ingredient {
   id: string;
@@ -145,19 +147,39 @@ const DOMINANT_SCENTS = [
 ];
 
 export default function ParfumAI() {
+  // Supabase hybrid storage hook
+  const {
+    user,
+    isLoading,
+    savedRecipes,
+    customIngredients,
+    hiddenIngredients,
+    saveRecipe: saveRecipeToStore,
+    deleteRecipe: deleteRecipeFromStore,
+    addCustomIngredient: addCustomIngredientToStore,
+    deleteCustomIngredient: deleteCustomIngredientFromStore,
+    hideDefaultIngredient: hideDefaultIngredientInStore,
+    signOut,
+    isAuthenticated
+  } = useParfumData();
+
+  // UI State
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
+  const [selectedRecipeForView, setSelectedRecipeForView] = useState<Recipe | null>(null);
+  
+  // Form states
   const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
-  const [customIngredients, setCustomIngredients] = useState<Ingredient[]>([]);
-  const [gender, setGender] = useState<'kadın' | 'erkek' | 'unisex'>('unisex');
+  const [gender, setGender] = useState<'kadın' | 'erkek' | 'unisex'>('kadın');
   const [season, setSeason] = useState<'ilkbahar' | 'yaz' | 'sonbahar' | 'kış'>('ilkbahar');
   const [dominantScent, setDominantScent] = useState('');
   const [generatedRecipe, setGeneratedRecipe] = useState('');
-  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
+  const [newRecipeName, setNewRecipeName] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMatching, setIsMatching] = useState(false);
-  const [newRecipeName, setNewRecipeName] = useState('');
-  
-  // Yeni malzeme ekleme state'leri
+
+  // Custom ingredient states
   const [showHammadeInput, setShowHammadeInput] = useState(false);
   const [showEsansInput, setShowEsansInput] = useState(false);
   const [newHammadeName, setNewHammadeName] = useState('');
@@ -166,59 +188,22 @@ export default function ParfumAI() {
   const [newEsansName, setNewEsansName] = useState('');
   const [newEsansDescription, setNewEsansDescription] = useState('');
   const [newEsansPurpose, setNewEsansPurpose] = useState('');
-  
-  // Modal state'leri
-  const [selectedRecipeForView, setSelectedRecipeForView] = useState<Recipe | null>(null);
-  const [showRecipeModal, setShowRecipeModal] = useState(false);
-  
-  // Hydration mismatch için client-side rendering kontrolü
+
+  // Client-side hydration
   const [isClient, setIsClient] = useState(false);
 
-  // Client-side rendering kontrolü
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // LocalStorage'dan veri yükleme
-  useEffect(() => {
-    if (!isClient) return;
-    
-    const savedCustomIngredients = localStorage.getItem('parfum-custom-ingredients');
-    const savedRecipesData = localStorage.getItem('parfum-saved-recipes');
-    
-    if (savedCustomIngredients) {
-      setCustomIngredients(JSON.parse(savedCustomIngredients));
-    }
-    
-    if (savedRecipesData) {
-      const parsedRecipes = JSON.parse(savedRecipesData).map((recipe: { createdAt: string }) => ({
-        ...recipe,
-        createdAt: new Date(recipe.createdAt)
-      }));
-      setSavedRecipes(parsedRecipes);
-    }
-  }, [isClient]);
-
-  // LocalStorage'a veri kaydetme
-  useEffect(() => {
-    if (!isClient) return;
-    localStorage.setItem('parfum-custom-ingredients', JSON.stringify(customIngredients));
-  }, [customIngredients, isClient]);
-
-  useEffect(() => {
-    if (!isClient) return;
-    localStorage.setItem('parfum-saved-recipes', JSON.stringify(savedRecipes));
-  }, [savedRecipes, isClient]);
-
   // Tüm malzemeleri birleştir (hidden olanları filtrele)
-  const hiddenDefaults = isClient ? JSON.parse(localStorage.getItem('parfum-hidden-defaults') || '[]') : [];
   const allIngredients = {
     hammadeler: [
-      ...DEFAULT_INGREDIENTS.hammadeler.filter(ing => !hiddenDefaults.includes(ing.id)), 
+      ...DEFAULT_INGREDIENTS.hammadeler.filter(ing => !hiddenIngredients.includes(ing.id)), 
       ...customIngredients.filter(ing => ing.type === 'hammade')
     ],
     esanslar: [
-      ...DEFAULT_INGREDIENTS.esanslar.filter(ing => !hiddenDefaults.includes(ing.id)), 
+      ...DEFAULT_INGREDIENTS.esanslar.filter(ing => !hiddenIngredients.includes(ing.id)), 
       ...customIngredients.filter(ing => ing.type === 'esans')
     ]
   };
@@ -233,57 +218,72 @@ export default function ParfumAI() {
     setSelectedIngredients(selectedIngredients.filter(item => item.id !== ingredientId));
   };
 
-  const addCustomHammade = () => {
+  const addCustomHammade = async () => {
     if (newHammadeName.trim()) {
-      const newIngredient: Ingredient = {
-        id: `custom-hammade-${Date.now()}`,
+      const newIngredient = {
         name: newHammadeName.trim(),
-        type: 'hammade',
+        type: 'hammade' as const,
         category: 'özel',
         isCustom: true,
         description: newHammadeDescription.trim() || 'Özel hammade malzemesi',
         purpose: newHammadePurpose.trim() || 'Özel amaç'
       };
-      setCustomIngredients([...customIngredients, newIngredient]);
-      setNewHammadeName('');
-      setNewHammadeDescription('');
-      setNewHammadePurpose('');
-      setShowHammadeInput(false);
+      
+      try {
+        await addCustomIngredientToStore(newIngredient);
+        setNewHammadeName('');
+        setNewHammadeDescription('');
+        setNewHammadePurpose('');
+        setShowHammadeInput(false);
+      } catch (error) {
+        console.error('Error adding custom ingredient:', error);
+        alert('Malzeme eklenirken bir hata oluştu.');
+      }
     }
   };
 
-  const addCustomEsans = () => {
+  const addCustomEsans = async () => {
     if (newEsansName.trim()) {
-      const newIngredient: Ingredient = {
-        id: `custom-esans-${Date.now()}`,
+      const newIngredient = {
         name: newEsansName.trim(),
-        type: 'esans',
+        type: 'esans' as const,
         category: 'özel',
         isCustom: true,
         description: newEsansDescription.trim() || 'Özel esans malzemesi',
         purpose: newEsansPurpose.trim() || 'Özel amaç'
       };
-      setCustomIngredients([...customIngredients, newIngredient]);
-      setNewEsansName('');
-      setNewEsansDescription('');
-      setNewEsansPurpose('');
-      setShowEsansInput(false);
+
+      try {
+        await addCustomIngredientToStore(newIngredient);
+        setNewEsansName('');
+        setNewEsansDescription('');
+        setNewEsansPurpose('');
+        setShowEsansInput(false);
+      } catch (error) {
+        console.error('Error adding custom ingredient:', error);
+        alert('Malzeme eklenirken bir hata oluştu.');
+      }
     }
   };
 
-  const deleteCustomIngredient = (ingredientId: string) => {
-    setCustomIngredients(customIngredients.filter(ing => ing.id !== ingredientId));
-    setSelectedIngredients(selectedIngredients.filter(ing => ing.id !== ingredientId));
+  const deleteCustomIngredient = async (ingredientId: string) => {
+    try {
+      await deleteCustomIngredientFromStore(ingredientId);
+      setSelectedIngredients(selectedIngredients.filter(ing => ing.id !== ingredientId));
+    } catch (error) {
+      console.error('Error deleting custom ingredient:', error);
+      alert('Malzeme silinirken bir hata oluştu.');
+    }
   };
 
-  const deleteDefaultIngredient = (ingredientId: string) => {
-    // Default ingredients'ı hidden olarak işaretle
-    const hiddenList = JSON.parse(localStorage.getItem('parfum-hidden-defaults') || '[]');
-    const newHiddenList = [...hiddenList, ingredientId];
-    localStorage.setItem('parfum-hidden-defaults', JSON.stringify(newHiddenList));
-    setSelectedIngredients(selectedIngredients.filter(ing => ing.id !== ingredientId));
-    // Sayfayı yenile
-    window.location.reload();
+  const deleteDefaultIngredient = async (ingredientId: string) => {
+    try {
+      await hideDefaultIngredientInStore(ingredientId);
+      setSelectedIngredients(selectedIngredients.filter(ing => ing.id !== ingredientId));
+    } catch (error) {
+      console.error('Error hiding ingredient:', error);
+      alert('Malzeme gizlenirken bir hata oluştu.');
+    }
   };
 
   const matchIngredientsWithEssence = async () => {
@@ -386,38 +386,43 @@ export default function ParfumAI() {
     }
   };
 
-  const saveRecipe = () => {
+  const saveRecipe = async () => {
     if (!generatedRecipe || !newRecipeName.trim()) {
       alert('Lütfen reçete adı girin ve bir reçete üreting!');
       return;
     }
 
-    const newRecipe: Recipe = {
-      id: Date.now().toString(),
-      name: newRecipeName.trim(),
-      ingredients: selectedIngredients,
-      gender,
-      season,
-      dominantScent,
-      recipe: generatedRecipe,
-      createdAt: new Date(),
-    };
-
-    setSavedRecipes([...savedRecipes, newRecipe]);
-    setNewRecipeName('');
-    alert('Reçete başarıyla kaydedildi!');
+    try {
+      await saveRecipeToStore({
+        name: newRecipeName.trim(),
+        ingredients: selectedIngredients,
+        gender,
+        season,
+        dominantScent,
+        recipe: generatedRecipe
+      });
+      
+      setNewRecipeName('');
+      alert('Reçete başarıyla kaydedildi!');
+    } catch (error) {
+      console.error('Error saving recipe:', error);
+      alert('Reçete kaydedilirken bir hata oluştu.');
+    }
   };
 
-  const deleteRecipe = (recipeId: string) => {
-    setSavedRecipes(savedRecipes.filter(recipe => recipe.id !== recipeId));
+  const deleteRecipe = async (recipeId: string) => {
+    try {
+      await deleteRecipeFromStore(recipeId);
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      alert('Reçete silinirken bir hata oluştu.');
+    }
   };
 
   const viewRecipe = (recipe: Recipe) => {
     setSelectedRecipeForView(recipe);
     setShowRecipeModal(true);
   };
-
-
 
   const downloadRecipeAsImage = async (recipe: Recipe) => {
     // HTML içeriği oluştur
@@ -492,14 +497,12 @@ export default function ParfumAI() {
     }
   };
 
-
-
   // Seçilen malzemeleri kategoriye göre ayır
   const selectedHammadeler = selectedIngredients.filter(ing => ing.type === 'hammade');
   const selectedEsanslar = selectedIngredients.filter(ing => ing.type === 'esans');
 
-  // Hydration mismatch önlemek için loading state
-  if (!isClient) {
+  // Loading state
+  if (isLoading || !isClient) {
     return (
       <div className="flex h-screen bg-gradient-to-br from-purple-50 to-pink-50 items-center justify-center">
         <div className="text-center">
@@ -507,6 +510,7 @@ export default function ParfumAI() {
             <Sparkles className="w-8 h-8 text-white animate-pulse" />
           </div>
           <h2 className="text-xl font-bold text-gray-800">Parfüm AI Yükleniyor...</h2>
+          {isLoading && <p className="text-gray-600 mt-2">Verileriniz yükleniyor...</p>}
         </div>
       </div>
     );
@@ -539,50 +543,72 @@ export default function ParfumAI() {
             </button>
           </div>
           
+          {/* Storage Status */}
+          <div className="p-4 bg-gray-50 border-b">
+            <div className="flex items-center gap-2 text-sm">
+              {isAuthenticated ? (
+                <>
+                  <Cloud className="w-4 h-4 text-green-600" />
+                  <span className="text-green-800 font-medium">Cloud Sync Aktif</span>
+                </>
+              ) : (
+                <>
+                  <HardDrive className="w-4 h-4 text-blue-600" />
+                  <span className="text-blue-800 font-medium">Yerel Depolama</span>
+                </>
+              )}
+            </div>
+            {isAuthenticated && (
+              <p className="text-xs text-gray-600 mt-1">
+                Verileriniz tüm cihazlarda senkronize
+              </p>
+            )}
+          </div>
+          
           <div className="flex-1 overflow-y-auto p-4">
             {savedRecipes.length === 0 ? (
               <p className="text-gray-500 text-center py-8">Henüz kayıtlı reçete yok</p>
             ) : (
               <div className="space-y-4">
-                                 {savedRecipes.map((recipe) => (
-                   <div key={recipe.id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                     <div className="flex items-start justify-between">
-                       <div className="flex-1">
-                         <h3 className="font-semibold text-gray-800">{recipe.name}</h3>
-                         <p className="text-sm text-gray-600 mt-1">
-                           {recipe.gender} • {recipe.season} • {recipe.dominantScent}
-                         </p>
-                         <p className="text-xs text-gray-500 mt-2">
-                           {recipe.ingredients.length} malzeme
-                         </p>
-                       </div>
-                       <div className="flex gap-1">
-                         <button
-                           onClick={() => viewRecipe(recipe)}
-                           className="text-blue-500 hover:text-blue-700 p-1"
-                           title="Reçeteyi Görüntüle"
-                         >
-                           <Eye className="w-4 h-4" />
-                         </button>
-                         <button
-                           onClick={() => downloadRecipeAsImage(recipe)}
-                           className="text-green-500 hover:text-green-700 p-1"
-                           title="Resim İndir (PNG)"
-                         >
-                           {/* eslint-disable-next-line jsx-a11y/alt-text */}
-                           <Image className="w-4 h-4" />
-                         </button>
-                         <button
-                           onClick={() => deleteRecipe(recipe.id)}
-                           className="text-red-500 hover:text-red-700 p-1"
-                           title="Sil"
-                         >
-                           <Trash2 className="w-4 h-4" />
-                         </button>
-                       </div>
-                     </div>
-                   </div>
-                 ))}
+                {savedRecipes.map((recipe) => (
+                  <div key={recipe.id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-800">{recipe.name}</h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {recipe.gender} • {recipe.season} • {recipe.dominantScent}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-2">
+                          {recipe.ingredients.length} malzeme
+                        </p>
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => viewRecipe(recipe)}
+                          className="text-blue-500 hover:text-blue-700 p-1"
+                          title="Reçeteyi Görüntüle"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => downloadRecipeAsImage(recipe)}
+                          className="text-green-500 hover:text-green-700 p-1"
+                          title="Resim İndir (PNG)"
+                        >
+                          {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                          <Image className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteRecipe(recipe.id)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                          title="Sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -612,13 +638,58 @@ export default function ParfumAI() {
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="hidden lg:flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
-            >
-              <Menu className="w-4 h-4" />
-              Reçeteler
-            </button>
+            
+            <div className="flex items-center gap-4">
+              {/* Storage Status */}
+              <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
+                {isAuthenticated ? (
+                  <>
+                    <Cloud className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-green-800">Cloud Sync</span>
+                  </>
+                ) : (
+                  <>
+                    <HardDrive className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-blue-800">Yerel</span>
+                  </>
+                )}
+              </div>
+
+              {/* Auth Buttons */}
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg">
+                    <User className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-green-800 truncate max-w-32">
+                      {user?.email}
+                    </span>
+                  </div>
+                  <button
+                    onClick={signOut}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden md:inline">Çıkış</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden md:inline">Giriş Yap</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="hidden lg:flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+              >
+                <Menu className="w-4 h-4" />
+                Reçeteler
+              </button>
+            </div>
           </div>
         </header>
 
@@ -1127,6 +1198,16 @@ export default function ParfumAI() {
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          setShowAuthModal(false)
+          // Veri yeniden yüklenecek otomatik olarak useParfumData hook'u ile
+        }}
+      />
     </div>
   );
 }

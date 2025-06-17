@@ -30,6 +30,7 @@ export type Database = {
           dominant_scent: string
           recipe: string
           created_at: string
+          updated_at: string
           user_id?: string
         }
         Insert: {
@@ -41,6 +42,7 @@ export type Database = {
           dominant_scent: string
           recipe: string
           created_at?: string
+          updated_at?: string
           user_id?: string
         }
         Update: {
@@ -51,6 +53,62 @@ export type Database = {
           season?: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış'
           dominant_scent?: string
           recipe?: string
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+      }
+      custom_ingredients: {
+        Row: {
+          id: string
+          name: string
+          type: 'hammade' | 'esans'
+          category: string
+          description?: string
+          purpose?: string
+          is_custom: boolean
+          user_id?: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          type: 'hammade' | 'esans'
+          category: string
+          description?: string
+          purpose?: string
+          is_custom?: boolean
+          user_id?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          type?: 'hammade' | 'esans'
+          category?: string
+          description?: string
+          purpose?: string
+          is_custom?: boolean
+          user_id?: string
+          created_at?: string
+        }
+      }
+      hidden_default_ingredients: {
+        Row: {
+          id: string
+          ingredient_id: string
+          created_at: string
+          user_id?: string
+        }
+        Insert: {
+          id?: string
+          ingredient_id: string
+          created_at?: string
+          user_id?: string
+        }
+        Update: {
+          id?: string
+          ingredient_id?: string
           created_at?: string
           user_id?: string
         }
