@@ -191,9 +191,13 @@ export const useParfumData = () => {
             // Supabase başarısız olursa manuel session ile devam et
             console.log('🔄 Manuel session ile devam ediliyor...')
             sessionStorage.setItem('parfum-auth', 'authenticated');
+            console.log('🔧 State güncelleniyor: isAuthenticated = true (manuel)')
             setIsAuthenticated(true);
+            console.log('🔧 State güncelleniyor: user = manuel')
             setUser({ id: 'admin-user-manual', email: 'admin@parfum.ai' });
+            console.log('🔧 Supabase data yükleniyor (manuel)...')
             await loadFromSupabase();
+            console.log('🔧 State güncellemesi tamamlandı (manuel)!')
             return { success: true };
           }
           
@@ -201,9 +205,13 @@ export const useParfumData = () => {
           
           // Yeni oluşturulan kullanıcı ile session başlat
           sessionStorage.setItem('parfum-auth', 'authenticated');
+          console.log('🔧 State güncelleniyor: isAuthenticated = true (yeni kullanıcı)')
           setIsAuthenticated(true);
+          console.log('🔧 State güncelleniyor: user = (yeni kullanıcı)', signUpData.user)
           setUser(signUpData.user || { id: 'admin-user-manual', email: 'admin@parfum.ai' });
+          console.log('🔧 Supabase data yükleniyor (yeni kullanıcı)...')
           await loadFromSupabase();
+          console.log('🔧 State güncellemesi tamamlandı (yeni kullanıcı)!')
           return { success: true };
           
         } else {
@@ -211,9 +219,13 @@ export const useParfumData = () => {
           
           // Mevcut kullanıcı ile giriş başarılı
           sessionStorage.setItem('parfum-auth', 'authenticated');
+          console.log('🔧 State güncelleniyor: isAuthenticated = true')
           setIsAuthenticated(true);
+          console.log('🔧 State güncelleniyor: user =', signInData.user)
           setUser(signInData.user);
+          console.log('🔧 Supabase data yükleniyor...')
           await loadFromSupabase();
+          console.log('🔧 State güncellemesi tamamlandı!')
           return { success: true };
         }
         
@@ -229,9 +241,13 @@ export const useParfumData = () => {
       // Hata durumunda da manuel session ile devam et
       console.log('🔄 Hata durumunda manuel session...')
       sessionStorage.setItem('parfum-auth', 'authenticated');
+      console.log('🔧 State güncelleniyor: isAuthenticated = true (hata durumu)')
       setIsAuthenticated(true);
+      console.log('🔧 State güncelleniyor: user = manuel (hata durumu)')
       setUser({ id: 'admin-user-manual', email: 'admin@parfum.ai' });
+      console.log('🔧 Supabase data yükleniyor (hata durumu)...')
       await loadFromSupabase();
+      console.log('🔧 State güncellemesi tamamlandı (hata durumu)!')
       return { success: true };
     }
   };

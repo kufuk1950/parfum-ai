@@ -58,6 +58,7 @@ const DOMINANT_SCENTS = [
 export default function ParfumAI() {
   // Supabase authentication hook
   const {
+    user,
     isLoading,
     isAuthenticated,
     savedRecipes,
@@ -103,6 +104,11 @@ export default function ParfumAI() {
     setIsClient(true);
   }, []);
 
+  // Authentication state değişimlerini izle
+  useEffect(() => {
+    console.log('🔄 Auth state değişti:', { isAuthenticated, user: user?.email, isLoading, isClient });
+  }, [isAuthenticated, user, isLoading, isClient]);
+
   // Loading state
   if (isLoading || !isClient) {
     return (
@@ -133,8 +139,14 @@ export default function ParfumAI() {
         {/* Login Modal - Always visible when not authenticated */}
         <AuthModal
           isOpen={true}
-          onClose={() => {}} // No close option - login required
+          onClose={() => {
+            console.log('🚪 AuthModal onClose çağrıldı - bu çalışmamalı')
+          }} // No close option - login required
           onSuccess={() => {
+            console.log('🎉 AuthModal onSuccess çağrıldı!')
+            console.log('📊 Current isAuthenticated:', isAuthenticated)
+            console.log('👤 Current user:', user)
+            console.log('🔄 State güncellemesi bekleniyor...')
             // Authentication success handled by useParfumData hook
           }}
         />
