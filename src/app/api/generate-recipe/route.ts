@@ -60,8 +60,11 @@ function generateDemoRecipe(
 
 📋 DETAYLI MALZEME LİSTESİ (${totalVolume}ml için):
 
-🌸 MARKA PARFÜM ESANSLARI (${esansVolume}ml toplam):
-${esanslar.map(ing => `• ${ing.name} - ${esansPerItem}ml`).join('\n') || '• Marka esans seçilmedi'}
+🌸 HAZIR MARKA PARFÜM ESANSLARI (${esansVolume}ml toplam):
+${esanslar.map(ing => `• ${ing.name} - ${esansPerItem}ml (hazır kullan)`).join('\n') || '• Hazır esans seçilmedi'}
+
+${esansUret.length > 0 ? `🧪 ÜRETİLECEK MARKA PARFÜM ESANSLARI:
+${esansUret.map(ing => `• ${ing.name} - FORMÜLASYON GEREKLİ (hammadelerle oluştur)`).join('\n')}` : ''}
 
 🌿 DESTEKLEYICI HAMMADELER (${hammadeVolume}ml toplam):
 ${hammadeler.map(ing => `• ${ing.name} - ${hammadePerItem}ml`).join('\n') || '• Hammade seçilmedi'}
