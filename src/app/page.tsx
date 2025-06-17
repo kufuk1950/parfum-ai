@@ -150,13 +150,6 @@ export default function ParfumAI() {
           onClose={() => {
             console.log('🚪 AuthModal onClose çağrıldı - bu çalışmamalı')
           }} // No close option - login required
-          onSuccess={() => {
-            console.log('🎉 AuthModal onSuccess çağrıldı!')
-            console.log('📊 onSuccess - isAuthenticated:', isAuthenticated)
-            console.log('👤 onSuccess - user:', user?.email)
-            console.log('⏰ State güncellemesi beklendiği için otomatik yönlendirme UseEffect ile olacak')
-            // State güncellemesi UseEffect ile izlenecek
-          }}
         />
       </div>
     );

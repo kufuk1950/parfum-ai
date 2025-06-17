@@ -7,10 +7,9 @@ import { useParfumData } from '../hooks/useParfumData'
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: () => void
 }
 
-export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -35,8 +34,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       
       if (result.success) {
         console.log('✅ Giriş başarılı!')
-        onSuccess()
-        onClose()
+        console.log('🔄 AuthModal: Zorla sayfa yenileme yapılıyor...')
+        
+        // Başarılı girişte direkt sayfa yenile
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+        
+        // Form temizle
         setUsername('')
         setPassword('')
       } else {
