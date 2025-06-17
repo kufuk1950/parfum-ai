@@ -5,6 +5,17 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+// Ingredient type for consistency
+export interface Ingredient {
+  id: string
+  name: string
+  type: 'hammade' | 'esans'
+  category: string
+  isCustom?: boolean
+  description?: string
+  purpose?: string
+}
+
 // Database types
 export type Database = {
   public: {
@@ -13,7 +24,7 @@ export type Database = {
         Row: {
           id: string
           name: string
-          ingredients: any[]
+          ingredients: Ingredient[]
           gender: 'kadın' | 'erkek' | 'unisex'
           season: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış'
           dominant_scent: string
@@ -24,7 +35,7 @@ export type Database = {
         Insert: {
           id?: string
           name: string
-          ingredients: any[]
+          ingredients: Ingredient[]
           gender: 'kadın' | 'erkek' | 'unisex'
           season: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış'
           dominant_scent: string
@@ -35,7 +46,7 @@ export type Database = {
         Update: {
           id?: string
           name?: string
-          ingredients?: any[]
+          ingredients?: Ingredient[]
           gender?: 'kadın' | 'erkek' | 'unisex'
           season?: 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış'
           dominant_scent?: string

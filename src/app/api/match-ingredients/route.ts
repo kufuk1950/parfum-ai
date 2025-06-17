@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const essenceNames = selectedEssences.map((e: any) => e.name).join(', ');
-      const availableNames = availableIngredients.map((i: any) => i.name).join(', ');
+      const essenceNames = selectedEssences.map((e: { name: string }) => e.name).join(', ');
+      const availableNames = availableIngredients.map((i: { name: string }) => i.name).join(', ');
 
       const prompt = `Sen profesyonel bir parfümörsün. Aşağıdaki bilgilere göre uygun hammade önerileri yap:
 
@@ -96,11 +96,12 @@ Sadece mevcut hammadeler listesindeki isimleri kullan!`;
         explanation: explanationMatch ? explanationMatch[1].trim() : 'Hammade önerileri hazırlandı'
       });
 
-    } catch (openaiError: any) {
+    } catch (openaiError: unknown) {
       console.error('OpenAI API hatası:', openaiError);
       
       // Quota veya başka API hatası durumunda fallback döndür
-      if (openaiError.status === 429 || openaiError.status === 401) {
+      const apiError = openaiError as { status?: number };
+      if (apiError.status === 429 || apiError.status === 401) {
         console.log('OpenAI quota aşıldı veya auth hatası, fallback response döndürülüyor');
         return NextResponse.json(fallbackResponse);
       }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Plus, Trash2, Sparkles, Save, FlaskConical, Edit3, Eye, Info, Image } from 'lucide-react';
+import { Menu, X, Plus, Trash2, Sparkles, Save, FlaskConical, Eye, Info, Image } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { Transition } from '@headlessui/react';
 
@@ -191,7 +191,7 @@ export default function ParfumAI() {
     }
     
     if (savedRecipesData) {
-      const parsedRecipes = JSON.parse(savedRecipesData).map((recipe: any) => ({
+      const parsedRecipes = JSON.parse(savedRecipesData).map((recipe: { createdAt: string }) => ({
         ...recipe,
         createdAt: new Date(recipe.createdAt)
       }));
@@ -569,6 +569,7 @@ export default function ParfumAI() {
                            className="text-green-500 hover:text-green-700 p-1"
                            title="Resim İndir (PNG)"
                          >
+                           {/* eslint-disable-next-line jsx-a11y/alt-text */}
                            <Image className="w-4 h-4" />
                          </button>
                          <button
@@ -921,7 +922,7 @@ export default function ParfumAI() {
                   <label className="block text-sm font-medium text-gray-800 mb-2">Cinsiyet</label>
                   <select
                     value={gender}
-                    onChange={(e) => setGender(e.target.value as any)}
+                    onChange={(e) => setGender(e.target.value as 'kadın' | 'erkek' | 'unisex')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 font-medium"
                   >
                     <option value="kadın">Kadın</option>
@@ -935,7 +936,7 @@ export default function ParfumAI() {
                   <label className="block text-sm font-medium text-gray-800 mb-2">Mevsim</label>
                   <select
                     value={season}
-                    onChange={(e) => setSeason(e.target.value as any)}
+                    onChange={(e) => setSeason(e.target.value as 'ilkbahar' | 'yaz' | 'sonbahar' | 'kış')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 font-medium"
                   >
                     <option value="ilkbahar">İlkbahar</option>
@@ -1050,6 +1051,7 @@ export default function ParfumAI() {
                   onClick={() => downloadRecipeAsImage(selectedRecipeForView)}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
                 >
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
                   <Image className="w-4 h-4" />
                   Resim İndir
                 </button>

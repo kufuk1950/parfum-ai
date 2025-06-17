@@ -260,11 +260,12 @@ Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Extrait kalitesinde pr
 
     return NextResponse.json({ recipe });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('API Error:', error);
     
     // Quota hatası veya diğer API hataları için demo reçete döndür
-    if (error?.status === 429 || error?.code === 'insufficient_quota') {
+    const apiError = error as { status?: number; code?: string };
+    if (apiError?.status === 429 || apiError?.code === 'insufficient_quota') {
       console.log('OpenAI quota exceeded, returning demo recipe');
       return NextResponse.json({ 
         recipe: generateDemoRecipe(ingredients, gender, season, dominantScent)
