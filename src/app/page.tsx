@@ -508,9 +508,14 @@ export default function ParfumAI() {
 
         <div style="margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
           <h2 style="color: #2d3748; font-size: 20px; font-weight: 600; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">Malzemeler</h2>
-          ${recipe.ingredients.map(ingredient => 
-            `<p style="margin: 6px 0; font-size: 16px; color: #2d3748;">• <strong>${ingredient.name}</strong> <span style="color: #718096;">(${ingredient.type === 'hammade' ? 'Hammade' : 'Esans'})</span></p>`
-          ).join('')}
+          ${recipe.ingredients.map(ingredient => {
+            let typeText = 'Esans';
+            if (ingredient.type === 'hammade') typeText = 'Hammade';
+            else if (ingredient.type === 'esans') typeText = 'Hazır Esans';
+            else if (ingredient.type === 'esans_uret') typeText = 'Esans Üret';
+            
+            return `<p style="margin: 6px 0; font-size: 16px; color: #2d3748;">• <strong>${ingredient.name}</strong> <span style="color: #718096;">(${typeText})</span></p>`;
+          }).join('')}
         </div>
 
         <div style="margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
@@ -1322,11 +1327,11 @@ export default function ParfumAI() {
               {/* Malzemeler */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Kullanılan Malzemeler</h3>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-3 gap-4">
                   {/* Hammadeler */}
                   {selectedRecipeForView.ingredients.filter(ing => ing.type === 'hammade').length > 0 && (
                     <div>
-                      <h4 className="font-medium text-gray-700 mb-2">Hammadeler</h4>
+                      <h4 className="font-medium text-gray-700 mb-2">🌿 Hammadeler</h4>
                       <div className="space-y-1">
                         {selectedRecipeForView.ingredients
                           .filter(ing => ing.type === 'hammade')
@@ -1342,10 +1347,10 @@ export default function ParfumAI() {
                     </div>
                   )}
                   
-                  {/* Esanslar */}
+                  {/* Hazır Esanslar */}
                   {selectedRecipeForView.ingredients.filter(ing => ing.type === 'esans').length > 0 && (
                     <div>
-                      <h4 className="font-medium text-gray-700 mb-2">Esanslar</h4>
+                      <h4 className="font-medium text-gray-700 mb-2">🌸 Hazır Esanslar</h4>
                       <div className="space-y-1">
                         {selectedRecipeForView.ingredients
                           .filter(ing => ing.type === 'esans')
@@ -1353,6 +1358,25 @@ export default function ParfumAI() {
                             <span
                               key={ingredient.id}
                               className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm mr-2 mb-1"
+                            >
+                              {ingredient.name}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Esans Üret */}
+                  {selectedRecipeForView.ingredients.filter(ing => ing.type === 'esans_uret').length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2">🧪 Esans Üret</h4>
+                      <div className="space-y-1">
+                        {selectedRecipeForView.ingredients
+                          .filter(ing => ing.type === 'esans_uret')
+                          .map((ingredient) => (
+                            <span
+                              key={ingredient.id}
+                              className="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm mr-2 mb-1"
                             >
                               {ingredient.name}
                             </span>
