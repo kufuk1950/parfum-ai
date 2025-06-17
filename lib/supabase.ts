@@ -9,7 +9,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 export interface Ingredient {
   id: string
   name: string
-  type: 'hammade' | 'esans'
+  type: 'hammade' | 'esans' | 'esans_uret'
   category: string
   isCustom?: boolean
   description?: string
@@ -62,7 +62,7 @@ export type Database = {
         Row: {
           id: string
           name: string
-          type: 'hammade' | 'esans'
+          type: 'hammade' | 'esans' | 'esans_uret'
           category: string
           description?: string
           purpose?: string
@@ -73,7 +73,7 @@ export type Database = {
         Insert: {
           id?: string
           name: string
-          type: 'hammade' | 'esans'
+          type: 'hammade' | 'esans' | 'esans_uret'
           category: string
           description?: string
           purpose?: string
@@ -84,7 +84,7 @@ export type Database = {
         Update: {
           id?: string
           name?: string
-          type?: 'hammade' | 'esans'
+          type?: 'hammade' | 'esans' | 'esans_uret'
           category?: string
           description?: string
           purpose?: string
@@ -117,7 +117,7 @@ export type Database = {
         Row: {
           id: string
           name: string
-          type: 'hammade' | 'esans'
+          type: 'hammade' | 'esans' | 'esans_uret'
           category: string
           description?: string
           purpose?: string
@@ -128,7 +128,7 @@ export type Database = {
         Insert: {
           id?: string
           name: string
-          type: 'hammade' | 'esans'
+          type: 'hammade' | 'esans' | 'esans_uret'
           category: string
           description?: string
           purpose?: string
@@ -139,7 +139,7 @@ export type Database = {
         Update: {
           id?: string
           name?: string
-          type?: 'hammade' | 'esans'
+          type?: 'hammade' | 'esans' | 'esans_uret'
           category?: string
           description?: string
           purpose?: string
