@@ -36,8 +36,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
       onClose()
       setEmail('')
       setPassword('')
-    } catch (err: any) {
-      setError(err.message || 'Bir hata oluştu')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Bir hata oluştu'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -70,7 +71,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           <ul className="text-sm text-blue-700 space-y-1">
             <li>• Reçeteleriniz tüm cihazlarda senkronize olur</li>
             <li>• Özel malzemeleriniz her zaman erişilebilir</li>
-            <li>• Verileriniz güvenli cloud'da saklanır</li>
+            <li>• Verileriniz güvenli cloud&apos;da saklanır</li>
             <li>• Başka cihazlarda da kullanabilirsiniz</li>
           </ul>
         </div>
