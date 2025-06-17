@@ -204,6 +204,13 @@ export const useParfumData = () => {
             console.log('🔧 Supabase data yükleniyor (manuel)...')
             await loadFromSupabase();
             console.log('🔧 State güncellemesi tamamlandı (manuel)!')
+            
+            // Zorla sayfa yenileme - React state güncellemesi async olduğu için
+            console.log('🔄 Zorla sayfa yenileme yapılıyor (manuel)...')
+            setTimeout(() => {
+              window.location.reload();
+            }, 100);
+            
             return { success: true };
           }
           
@@ -218,6 +225,13 @@ export const useParfumData = () => {
           console.log('🔧 Supabase data yükleniyor (yeni kullanıcı)...')
           await loadFromSupabase();
           console.log('🔧 State güncellemesi tamamlandı (yeni kullanıcı)!')
+          
+          // Zorla sayfa yenileme - React state güncellemesi async olduğu için
+          console.log('🔄 Zorla sayfa yenileme yapılıyor (yeni kullanıcı)...')
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+          
           return { success: true };
           
         } else {
@@ -234,6 +248,13 @@ export const useParfumData = () => {
           await loadFromSupabase();
           console.log('🔧 State güncellemesi tamamlandı!')
           console.log('🎯 RETURN EDİYORUM: {success: true}')
+          
+          // Zorla sayfa yenileme - React state güncellemesi async olduğu için
+          console.log('🔄 Zorla sayfa yenileme yapılıyor...')
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+          
           return { success: true };
         }
         
@@ -256,6 +277,13 @@ export const useParfumData = () => {
       console.log('🔧 Supabase data yükleniyor (hata durumu)...')
       await loadFromSupabase();
       console.log('🔧 State güncellemesi tamamlandı (hata durumu)!')
+      
+      // Zorla sayfa yenileme - React state güncellemesi async olduğu için
+      console.log('🔄 Zorla sayfa yenileme yapılıyor (hata durumu)...')
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+      
       return { success: true };
     }
   };
