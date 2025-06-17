@@ -248,6 +248,9 @@ export default function ParfumAI() {
   const matchIngredientsWithEssence = async () => {
     const selectedEssences = selectedIngredients.filter(ing => ing.type === 'esans');
     
+    console.log('🔍 Match Ingredients başlatıldı');
+    console.log('🌸 Seçilen esanslar:', selectedEssences.map(e => e.name));
+    
     if (selectedEssences.length === 0) {
       alert('Lütfen önce en az bir esans seçin!');
       return;
@@ -255,6 +258,7 @@ export default function ParfumAI() {
 
     setIsMatching(true);
     try {
+      console.log('📤 API çağrısı gönderiliyor...');
       const response = await fetch('/api/match-ingredients', {
         method: 'POST',
         headers: {
@@ -270,31 +274,62 @@ export default function ParfumAI() {
       });
 
       if (!response.ok) {
+        console.error('❌ API response not ok:', response.status, response.statusText);
         throw new Error('API çağrısında hata oluştu');
       }
 
       const data = await response.json();
+      console.log('✅ API response:', data);
       
       // AI'nın önerdiği hammadeleri seçili malzemelere ekle
       const recommendedIngredients = data.recommendedIngredients || [];
+      console.log('🎯 Önerilen hammadeler:', recommendedIngredients);
+      
       const newSelectedIngredients = [...selectedIngredients];
+      let addedCount = 0;
       
       recommendedIngredients.forEach((ingredientName: string) => {
+        console.log('🔍 Aranan hammade:', ingredientName);
+        
         const foundIngredient = allIngredients.hammadeler.find(
-          ing => ing.name.toLowerCase().includes(ingredientName.toLowerCase()) ||
-                 ingredientName.toLowerCase().includes(ing.name.toLowerCase())
+          ing => {
+            const match = ing.name.toLowerCase().includes(ingredientName.toLowerCase()) ||
+                         ingredientName.toLowerCase().includes(ing.name.toLowerCase());
+            if (match) console.log('✅ Eşleşme bulundu:', ing.name, '←→', ingredientName);
+            return match;
+          }
         );
         
-        if (foundIngredient && !newSelectedIngredients.find(item => item.id === foundIngredient.id)) {
-          newSelectedIngredients.push(foundIngredient);
+        if (foundIngredient) {
+          const alreadySelected = newSelectedIngredients.find(item => item.id === foundIngredient.id);
+          if (!alreadySelected) {
+            console.log('➕ Ekleniyor:', foundIngredient.name);
+            newSelectedIngredients.push(foundIngredient);
+            addedCount++;
+          } else {
+            console.log('⚠️ Zaten seçili:', foundIngredient.name);
+          }
+        } else {
+          console.log('❌ Bulunamadı:', ingredientName);
         }
       });
       
+      console.log('📊 Ekleme özeti:', {
+        önerilen: recommendedIngredients.length,
+        eklenen: addedCount,
+        toplamSeçili: newSelectedIngredients.length
+      });
+      
       setSelectedIngredients(newSelectedIngredients);
-      alert(`${recommendedIngredients.length} hammade önerisi seçildi! Artık reçete oluşturabilirsiniz.`);
+      
+      if (addedCount > 0) {
+        alert(`✅ ${addedCount} hammade başarıyla eklendi!\n\n${data.explanation}\n\nArtık reçete oluşturabilirsiniz.`);
+      } else {
+        alert(`ℹ️ Önerilen hammadeler zaten seçili veya bulunamadı.\n\n${data.explanation}`);
+      }
       
     } catch (error) {
-      console.error('Hammade eşleştirme hatası:', error);
+      console.error('💥 Hammade eşleştirme hatası:', error);
       alert('Hammade eşleştirmesi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setIsMatching(false);

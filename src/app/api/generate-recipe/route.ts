@@ -250,27 +250,40 @@ Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Extrait kalitesinde pr
 `;
 
     console.log('🚀 GROQ API çağrısı yapılıyor...');
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
-      messages: [
-        {
-          role: "system",
-          content: "Sen uzman bir parfümörsün. Türkçe olarak detaylı, profesyonel ve uygulanabilir parfüm reçeteleri hazırlıyorsun."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      max_tokens: 3000,
-      temperature: 0.8,
-    });
+    
+    try {
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "system",
+            content: "Sen uzman bir parfümörsün. Türkçe olarak detaylı, profesyonel ve uygulanabilir parfüm reçeteleri hazırlıyorsun."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 3000,
+        temperature: 0.8,
+      });
 
-    console.log('✅ GROQ API yanıt aldı');
-    const recipe = completion.choices[0]?.message?.content || 'Reçete üretilemedi, lütfen tekrar deneyin.';
+      console.log('✅ GROQ API yanıt aldı');
+      const recipe = completion.choices[0]?.message?.content || 'Reçete üretilemedi, lütfen tekrar deneyin.';
+      console.log('📏 Recipe length:', recipe.length);
 
-    console.log('📤 Response gönderiliyor...');
-    return NextResponse.json({ recipe });
+      console.log('📤 Response gönderiliyor...');
+      return NextResponse.json({ recipe });
+      
+    } catch (groqApiError: unknown) {
+      console.error('💥 GROQ API Internal Error:', groqApiError);
+      
+      // GROQ API hatası durumunda demo reçete döndür
+      console.log('❌ GROQ API failed, returning demo recipe');
+      return NextResponse.json({ 
+        recipe: generateDemoRecipe(ingredients, gender, season, dominantScent)
+      });
+    }
 
   } catch (error: unknown) {
     console.error('💥 API Error:', error);
