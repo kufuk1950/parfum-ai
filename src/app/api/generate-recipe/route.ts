@@ -138,7 +138,10 @@ ${dominantScent ? `🌟 Baskın koku profili: ${dominantScent}` : ''}
 ⚡ Karıştırma süresi: 25 dakika
 
 📝 NOT: Manyetik karıştırıcı ile profesyonel parfüm yapım tekniği!
-OpenAI API sorunu nedeniyle demo versiyon gösterilmektedir.`;
+
+⚠️ DEMO VERSİYON: OpenAI API key eksik/geçersiz olduğu için demo reçete gösteriliyor.
+Bu reçetedeki malzemeler sizin seçtikleriniz DEĞİL - test amaçlı demo verilerdir.
+OpenAI API key'ini Vercel Environment Variables'a ekleyiniz.`;
 }
 
 export async function POST(request: NextRequest) {
@@ -166,9 +169,11 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.OPENAI_API_KEY;
     console.log('🔑 OpenAI API Key exists:', !!apiKey);
     console.log('🔑 OpenAI API Key length:', apiKey?.length || 0);
+    console.log('🔑 OpenAI API Key starts with sk-:', apiKey?.startsWith('sk-') || false);
     
     if (!apiKey || apiKey.trim() === '' || apiKey === 'your-openai-api-key-here') {
       console.log('❌ OpenAI API Key invalid, returning demo recipe');
+      console.log('❌ Reason: Key is', !apiKey ? 'missing' : apiKey === 'your-openai-api-key-here' ? 'default placeholder' : 'empty');
       return NextResponse.json({ recipe: generateDemoRecipe(ingredients, gender, season, dominantScent, perfumeVolume) });
     }
 
@@ -333,8 +338,12 @@ Türkçe yanıtla. Her ölçümü ML olarak net ver. Matematik %100 doğru olsun
 `;
 
     console.log('🚀 OpenAI API çağrısı yapılıyor...');
+    console.log('📊 Prompt hazırlandı, character count:', prompt.length);
+    console.log('🎯 Model: gpt-3.5-turbo');
     
     try {
+      console.log('⏳ OpenAI API request başlatılıyor...');
+      
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
@@ -351,20 +360,28 @@ Türkçe yanıtla. Her ölçümü ML olarak net ver. Matematik %100 doğru olsun
         temperature: 0.7,
       });
 
-      console.log('✅ OpenAI API yanıt aldı');
+      console.log('✅ OpenAI API BAŞARILI yanıt aldı!');
+      console.log('🔍 Response choice count:', completion.choices?.length || 0);
+      console.log('⚡ Usage tokens:', completion.usage?.total_tokens || 'unknown');
+      
       const recipe = completion.choices[0]?.message?.content || 'Reçete üretilemedi, lütfen tekrar deneyin.';
       console.log('📏 Recipe length:', recipe.length);
+      console.log('🎉 GERÇEK OPENAI REÇETESİ döndürülüyor!');
 
-      console.log('📤 Response gönderiliyor...');
+      console.log('📤 OpenAI response gönderiliyor...');
       return NextResponse.json({ recipe });
       
     } catch (openaiApiError: unknown) {
       console.error('💥 OpenAI API Internal Error:', openaiApiError);
+      console.error('🔍 Error details:', {
+        message: openaiApiError instanceof Error ? openaiApiError.message : 'Unknown error',
+        name: openaiApiError instanceof Error ? openaiApiError.name : 'Unknown'
+      });
       
       // OpenAI API hatası durumunda demo reçete döndür
-      console.log('❌ OpenAI API failed, returning demo recipe');
+      console.log('❌ OpenAI API failed, returning demo recipe as fallback');
       return NextResponse.json({ 
-        recipe: generateDemoRecipe(ingredients, gender, season, dominantScent, perfumeVolume)
+        recipe: generateDemoRecipe(ingredients, gender, season, dominantScent, perfumeVolume) + '\n\n🚨 OpenAI API ERROR: Yukarıdaki reçete demo versiyon - gerçek AI yanıtı alınamadı!'
       });
     }
 

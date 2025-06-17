@@ -344,8 +344,14 @@ export default function ParfumAI() {
       return;
     }
 
+    console.log('🚀 Reçete üretimi başlatılıyor...');
+    console.log('📝 Seçilen malzemeler:', selectedIngredients.map(ing => ing.name));
+    console.log('⚙️ Parametreler:', { gender, season, dominantScent, perfumeVolume });
+
     setIsGenerating(true);
     try {
+      console.log('📤 API çağrısı gönderiliyor...');
+      
       const response = await fetch('/api/generate-recipe', {
         method: 'POST',
         headers: {
@@ -360,11 +366,29 @@ export default function ParfumAI() {
         }),
       });
 
+      console.log('📥 API response status:', response.status);
+      console.log('📥 API response ok:', response.ok);
+
       if (!response.ok) {
         throw new Error('API çağrısında hata oluştu');
       }
 
       const data = await response.json();
+      console.log('✅ API response data alındı');
+      console.log('📏 Recipe length:', data.recipe?.length || 0);
+      
+      // Demo mu OpenAI mi kontrol et
+      if (data.recipe?.includes('OpenAI API sorunu nedeniyle demo versiyon')) {
+        console.log('⚠️ DEMO REÇETE döndü - OpenAI çalışmıyor veya key yok!');
+        alert('⚠️ Demo reçete gösteriliyor! OpenAI API key kontrol et.');
+      } else if (data.recipe?.includes('Demo mod')) {
+        console.log('⚠️ FALLBACK DEMO döndü - OpenAI key geçersiz!');
+        alert('⚠️ Demo mod! OpenAI API key doğru mu kontrol et.');
+      } else {
+        console.log('🎉 OPENAI GERÇEK REÇETE döndü!');
+        alert('🎉 OpenAI ile reçete üretildi!');
+      }
+      
       setGeneratedRecipe(data.recipe);
       
       // Form alanlarını temizle (yeni reçete için hazırla)
