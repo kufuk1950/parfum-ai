@@ -28,128 +28,36 @@ interface Recipe {
   createdAt: Date;
 }
 
+// Default ingredients
 const DEFAULT_INGREDIENTS = {
   hammadeler: [
-    { 
-      id: '1', name: 'Gül Yaprağı', type: 'hammade' as const, category: 'çiçeksi', isCustom: false,
-      description: 'Doğal gül yaprakları, üst notalar için',
-      purpose: 'Romantik, feminen, yumuşak açılış sağlar'
-    },
-    { 
-      id: '2', name: 'Lavanta', type: 'hammade' as const, category: 'çiçeksi', isCustom: false,
-      description: 'Kuru lavanta çiçekleri, rahatlatıcı etki',
-      purpose: 'Sakinleştirici, temiz ve taze hissiyat'
-    },
-    { 
-      id: '3', name: 'Yasemin', type: 'hammade' as const, category: 'çiçeksi', isCustom: false,
-      description: 'Gece açan yasemin çiçekleri',
-      purpose: 'Egzotik, büyüleyici ve yoğun çiçeksi nota'
-    },
-    { 
-      id: '4', name: 'Sandal Ağacı', type: 'hammade' as const, category: 'odunsu', isCustom: false,
-      description: 'Öğütülmüş sandal ağacı parçaları',
-      purpose: 'Krem benzeri, yumuşak odunsu temel nota'
-    },
-    { 
-      id: '5', name: 'Sedir', type: 'hammade' as const, category: 'odunsu', isCustom: false,
-      description: 'Atlas sedir ağacı parçaları',
-      purpose: 'Güçlü, maskülen, uzun süre kalıcı'
-    },
-    { 
-      id: '6', name: 'Vetiver', type: 'hammade' as const, category: 'odunsu', isCustom: false,
-      description: 'Vetiver otu kökleri',
-      purpose: 'Toprak kokulu, yatıştırıcı temel nota'
-    },
-    { 
-      id: '7', name: 'Bergamot Kabuğu', type: 'hammade' as const, category: 'narenciye', isCustom: false,
-      description: 'Taze bergamot meyvesi kabuğu',
-      purpose: 'Canlandırıcı üst nota, ferahlatıcı açılış'
-    },
-    { 
-      id: '8', name: 'Limon Kabuğu', type: 'hammade' as const, category: 'narenciye', isCustom: false,
-      description: 'Organik limon kabuğu rendesi',
-      purpose: 'Enerji verici, temiz ve parlak üst nota'
-    },
-    { 
-      id: '9', name: 'Vanilya Çubuğu', type: 'hammade' as const, category: 'tatlı', isCustom: false,
-      description: 'Doğal Madagaskar vanilya çubukları',
-      purpose: 'Sıcak, tatlı, rahatlatıcı temel nota'
-    },
-    { 
-      id: '10', name: 'Tarçın', type: 'hammade' as const, category: 'baharatlı', isCustom: false,
-      description: 'Ceylon tarçın çubukları',
-      purpose: 'Sıcak, baharatlı, canlandırıcı orta nota'
-    },
+    { id: 'h1', name: 'Gül Yaprakları', type: 'hammade' as const, category: 'çiçek', isCustom: false, description: 'Doğal gül yaprakları, romantik ve feminen koku', purpose: 'Temel çiçeksi nota, kalp notası' },
+    { id: 'h2', name: 'Lavanta Çiçekleri', type: 'hammade' as const, category: 'çiçek', isCustom: false, description: 'Sakinleştirici lavanta çiçekleri', purpose: 'Rahatlatıcı etki, üst nota' },
+    { id: 'h3', name: 'Bergamot Kabuğu', type: 'hammade' as const, category: 'narenciye', isCustom: false, description: 'Taze ve canlandırıcı bergamot kabuğu', purpose: 'Üst nota, serinletici etki' },
+    { id: 'h4', name: 'Vanilya Çubuğu', type: 'hammade' as const, category: 'baharat', isCustom: false, description: 'Sıcak ve tatlı vanilya çubuğu', purpose: 'Dip nota, sıcaklık ve derinlik' },
+    { id: 'h5', name: 'Sandal Ağacı', type: 'hammade' as const, category: 'odunsu', isCustom: false, description: 'Kremal ve yumuşak sandal ağacı', purpose: 'Dip nota, odunsu karakter' },
+    { id: 'h6', name: 'Jasmine Petalleri', type: 'hammade' as const, category: 'çiçek', isCustom: false, description: 'Yoğun ve intoksikan jasmine petalleri', purpose: 'Kalp notası, feminen karakter' },
+    { id: 'h7', name: 'Patchouli Yaprakları', type: 'hammade' as const, category: 'odunsu', isCustom: false, description: 'Toprak kokusu veren patchouli yaprakları', purpose: 'Dip nota, doğal karakter' }
   ],
   esanslar: [
-    { 
-      id: '11', name: 'Gül Esansı', type: 'esans' as const, category: 'çiçeksi', isCustom: false,
-      description: 'Buhar distilasyonu ile elde edilen gül esansı',
-      purpose: 'Yoğun çiçeksi kalp notası, kadınsı karakter'
-    },
-    { 
-      id: '12', name: 'Lavanta Esansı', type: 'esans' as const, category: 'çiçeksi', isCustom: false,
-      description: 'Fransız lavanta esansı, aromaterapi kalitesi',
-      purpose: 'Rahatlatıcı, stres azaltıcı, unisex'
-    },
-    { 
-      id: '13', name: 'Amber Esansı', type: 'esans' as const, category: 'oryantal', isCustom: false,
-      description: 'Reçineli amber esansı, sıcak ve büyüleyici',
-      purpose: 'Gizemli, sıcak, uzun süre kalıcı temel nota'
-    },
-    { 
-      id: '14', name: 'Misk Esansı', type: 'esans' as const, category: 'oryantal', isCustom: false,
-      description: 'Sentetik misk, hayvan dostu',
-      purpose: 'Güçlü sillaj, uzun kalıcılık, çekici'
-    },
-    { 
-      id: '15', name: 'Bergamot Esansı', type: 'esans' as const, category: 'narenciye', isCustom: false,
-      description: 'İtalyan bergamot esansı, Earl Grey aroması',
-      purpose: 'Sofistike üst nota, ferahlatıcı açılış'
-    },
-    { 
-      id: '16', name: 'Limon Esansı', type: 'esans' as const, category: 'narenciye', isCustom: false,
-      description: 'Sicilya limon esansı, doğal ve canlı',
-      purpose: 'Enerjik başlangıç, temizleyici etki'
-    },
-    { 
-      id: '17', name: 'Sandal Ağacı Esansı', type: 'esans' as const, category: 'odunsu', isCustom: false,
-      description: 'Hint sandal ağacı esansı, kremsi doku',
-      purpose: 'Yumuşak odunsu temel, meditasyon'
-    },
-    { 
-      id: '18', name: 'Oud Esansı', type: 'esans' as const, category: 'oryantal', isCustom: false,
-      description: 'Agarwood esansı, lüks ve egzotik',
-      purpose: 'Güçlü karakter, statü sembolü, kalıcı'
-    },
-    { 
-      id: '19', name: 'Vanilya Esansı', type: 'esans' as const, category: 'tatlı', isCustom: false,
-      description: 'Doğal vanilya esansı, gourmand karakter',
-      purpose: 'Sıcak, tatlı, rahatlatıcı son notalar'
-    },
-    { 
-      id: '20', name: 'Paçuli Esansı', type: 'esans' as const, category: 'toprak kokulu', isCustom: false,
-      description: 'Endonezya paçuli esansı, hippie kültürü',
-      purpose: 'Toprak kokulu temel, doğal ve mistik'
-    },
+    { id: 'e1', name: 'Gül Esansı', type: 'esans' as const, category: 'çiçek', isCustom: false, description: 'Damıtılmış gül esansı, yoğun çiçeksi koku', purpose: 'Ana kalp notası, romantik etki' },
+    { id: 'e2', name: 'Lavanta Esansı', type: 'esans' as const, category: 'çiçek', isCustom: false, description: 'Saf lavanta esansı, rahatlatıcı', purpose: 'Üst nota, temizlik hissi' },
+    { id: 'e3', name: 'Bergamot Esansı', type: 'esans' as const, category: 'narenciye', isCustom: false, description: 'Earl Grey çayında kullanılan bergamot esansı', purpose: 'Üst nota, fresh başlangıç' },
+    { id: 'e4', name: 'Vanilya Esansı', type: 'esans' as const, category: 'baharat', isCustom: false, description: 'Konsantre vanilya esansı, tatlı ve sıcak', purpose: 'Dip nota, kalıcı tatlılık' },
+    { id: 'e5', name: 'Sandal Esansı', type: 'esans' as const, category: 'odunsu', isCustom: false, description: 'Mistik sandal ağacı esansı', purpose: 'Dip nota, meditasyon hissi' },
+    { id: 'e6', name: 'Jasmine Esansı', type: 'esans' as const, category: 'çiçek', isCustom: false, description: 'Gece blooming jasmine esansı', purpose: 'Kalp notası, gece parfümü' },
+    { id: 'e7', name: 'Misk Esansı', type: 'esans' as const, category: 'animal', isCustom: false, description: 'Sentetik misk esansı, hayvansal nota', purpose: 'Dip nota, sensüel etki' }
   ]
 };
 
+// Dominant scents
 const DOMINANT_SCENTS = [
-  'Çiçeksi (Floral)',
-  'Narenciye (Citrus)', 
-  'Odunsu (Woody)',
-  'Oryantal (Oriental)',
-  'Taze (Fresh)',
-  'Baharatlı (Spicy)',
-  'Tatlı (Sweet)',
-  'Toprak Kokulu (Earthy)'
+  'Çiçeksi', 'Odunsu', 'Narenciye', 'Oryantal', 'Taze', 'Baharatlı', 'Meyve', 'Yeşil'
 ];
 
 export default function ParfumAI() {
   // Supabase authentication hook
   const {
-    user,
     isLoading,
     isAuthenticated,
     savedRecipes,
