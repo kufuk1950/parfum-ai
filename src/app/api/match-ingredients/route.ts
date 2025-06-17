@@ -7,12 +7,6 @@ interface EssenceInput {
   category?: string;
 }
 
-interface IngredientInput {
-  name: string;
-  type: string;
-  category?: string;
-}
-
 export async function POST(req: NextRequest) {
   console.log('🔍 Match Ingredients API çağrıldı');
   
