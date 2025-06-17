@@ -154,18 +154,24 @@ export const useParfumData = () => {
 
   // Authentication fonksiyonları
   const signIn = async (username: string, password: string) => {
+    console.log('🔑 useParfumData signIn çağrıldı')
+    console.log('👤 Username check:', username, '===', 'adminufuk', '?', username === 'adminufuk')
+    console.log('🔒 Password check:', password, '===', 'Ufuk12345K', '?', password === 'Ufuk12345K')
+    
     try {
       // Hardcoded authentication
       if (username === 'adminufuk' && password === 'Ufuk12345K') {
+        console.log('✅ Hardcoded credentials doğru!')
         
         // Önce mevcut kullanıcı ile giriş yapmayı dene
+        console.log('🌐 Supabase auth deneniyor: admin@parfum.ai')
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email: 'admin@parfum.ai',
           password: 'Ufuk12345K'
         });
         
         if (signInError) {
-          console.log('Kullanıcı bulunamadı, oluşturuluyor...', signInError.message);
+          console.log('⚠️ Kullanıcı bulunamadı, oluşturuluyor...', signInError.message);
           
           // Kullanıcı yoksa oluştur (Email confirmation'sız)
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -180,9 +186,10 @@ export const useParfumData = () => {
           });
           
           if (signUpError) {
-            console.error('Kullanıcı oluşturulamadı:', signUpError);
+            console.error('❌ Kullanıcı oluşturulamadı:', signUpError);
             
             // Supabase başarısız olursa manuel session ile devam et
+            console.log('🔄 Manuel session ile devam ediliyor...')
             sessionStorage.setItem('parfum-auth', 'authenticated');
             setIsAuthenticated(true);
             setUser({ id: 'admin-user-manual', email: 'admin@parfum.ai' });
@@ -190,7 +197,7 @@ export const useParfumData = () => {
             return { success: true };
           }
           
-          console.log('Kullanıcı başarıyla oluşturuldu:', signUpData);
+          console.log('✅ Kullanıcı başarıyla oluşturuldu:', signUpData);
           
           // Yeni oluşturulan kullanıcı ile session başlat
           sessionStorage.setItem('parfum-auth', 'authenticated');
@@ -200,7 +207,7 @@ export const useParfumData = () => {
           return { success: true };
           
         } else {
-          console.log('Kullanıcı bulundu, giriş başarılı:', signInData);
+          console.log('✅ Kullanıcı bulundu, giriş başarılı:', signInData);
           
           // Mevcut kullanıcı ile giriş başarılı
           sessionStorage.setItem('parfum-auth', 'authenticated');
@@ -211,12 +218,16 @@ export const useParfumData = () => {
         }
         
       } else {
+        console.log('❌ Hardcoded credentials yanlış!')
+        console.log('Expected: adminufuk / Ufuk12345K')
+        console.log('Received:', username, '/', password)
         return { success: false, error: 'Kullanıcı adı veya şifre hatalı!' };
       }
     } catch (error) {
-      console.error('Authentication error:', error);
+      console.error('💥 Authentication error:', error);
       
       // Hata durumunda da manuel session ile devam et
+      console.log('🔄 Hata durumunda manuel session...')
       sessionStorage.setItem('parfum-auth', 'authenticated');
       setIsAuthenticated(true);
       setUser({ id: 'admin-user-manual', email: 'admin@parfum.ai' });

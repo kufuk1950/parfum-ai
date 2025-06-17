@@ -24,18 +24,27 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     setLoading(true)
     setError('')
 
+    console.log('🔐 AuthModal: Giriş denemesi başladı')
+    console.log('📝 Girilen username:', username)
+    console.log('📝 Girilen password:', password ? '***' + password.slice(-2) : 'BOŞ')
+
     try {
+      console.log('🚀 signIn fonksiyonu çağrılıyor...')
       const result = await signIn(username, password)
+      console.log('📨 signIn sonucu:', result)
       
       if (result.success) {
+        console.log('✅ Giriş başarılı!')
         onSuccess()
         onClose()
         setUsername('')
         setPassword('')
       } else {
+        console.log('❌ Giriş başarısız:', result.error)
         setError(result.error || 'Giriş yapılamadı')
       }
     } catch (err: unknown) {
+      console.error('💥 AuthModal handleSubmit error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Giriş yapılamadı'
       setError(errorMessage)
     } finally {
