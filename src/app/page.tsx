@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Plus, Trash2, Sparkles, Save, FlaskConical, Eye, Info, Image, LogIn, LogOut, User, Cloud, HardDrive } from 'lucide-react';
+import { Menu, X, Plus, Trash2, Sparkles, Save, FlaskConical, Eye, Info, Image, LogOut, User } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { Transition } from '@headlessui/react';
 import { useParfumData } from '../../hooks/useParfumData';
@@ -147,10 +147,11 @@ const DOMINANT_SCENTS = [
 ];
 
 export default function ParfumAI() {
-  // Supabase hybrid storage hook
+  // Supabase authentication hook
   const {
     user,
     isLoading,
+    isAuthenticated,
     savedRecipes,
     customIngredients,
     hiddenIngredients,
@@ -159,13 +160,11 @@ export default function ParfumAI() {
     addCustomIngredient: addCustomIngredientToStore,
     deleteCustomIngredient: deleteCustomIngredientFromStore,
     hideDefaultIngredient: hideDefaultIngredientInStore,
-    signOut,
-    isAuthenticated
+    signOut
   } = useParfumData();
 
   // UI State
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [selectedRecipeForView, setSelectedRecipeForView] = useState<Recipe | null>(null);
   
@@ -195,6 +194,45 @@ export default function ParfumAI() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Loading state
+  if (isLoading || !isClient) {
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-purple-50 to-pink-50 items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Sparkles className="w-8 h-8 text-white animate-pulse" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-800">Parfüm AI Yükleniyor...</h2>
+          <p className="text-gray-600 mt-2">Güvenli bağlantı kuruluyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Authentication required - show login modal
+  if (!isAuthenticated) {
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-purple-50 to-pink-50 items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Parfüm AI</h1>
+          <p className="text-gray-600 mb-8">Yapay zeka ile parfüm reçetesi oluşturun</p>
+        </div>
+        
+        {/* Login Modal - Always visible when not authenticated */}
+        <AuthModal
+          isOpen={true}
+          onClose={() => {}} // No close option - login required
+          onSuccess={() => {
+            // Authentication success handled by useParfumData hook
+          }}
+        />
+      </div>
+    );
+  }
 
   // Tüm malzemeleri birleştir (hidden olanları filtrele)
   const allIngredients = {
@@ -501,21 +539,6 @@ export default function ParfumAI() {
   const selectedHammadeler = selectedIngredients.filter(ing => ing.type === 'hammade');
   const selectedEsanslar = selectedIngredients.filter(ing => ing.type === 'esans');
 
-  // Loading state
-  if (isLoading || !isClient) {
-    return (
-      <div className="flex h-screen bg-gradient-to-br from-purple-50 to-pink-50 items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-8 h-8 text-white animate-pulse" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-800">Parfüm AI Yükleniyor...</h2>
-          {isLoading && <p className="text-gray-600 mt-2">Verileriniz yükleniyor...</p>}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       {/* Sidebar */}
@@ -541,28 +564,6 @@ export default function ParfumAI() {
             >
               <X className="w-6 h-6" />
             </button>
-          </div>
-          
-          {/* Storage Status */}
-          <div className="p-4 bg-gray-50 border-b">
-            <div className="flex items-center gap-2 text-sm">
-              {isAuthenticated ? (
-                <>
-                  <Cloud className="w-4 h-4 text-green-600" />
-                  <span className="text-green-800 font-medium">Cloud Sync Aktif</span>
-                </>
-              ) : (
-                <>
-                  <HardDrive className="w-4 h-4 text-blue-600" />
-                  <span className="text-blue-800 font-medium">Yerel Depolama</span>
-                </>
-              )}
-            </div>
-            {isAuthenticated && (
-              <p className="text-xs text-gray-600 mt-1">
-                Verileriniz tüm cihazlarda senkronize
-              </p>
-            )}
           </div>
           
           <div className="flex-1 overflow-y-auto p-4">
@@ -640,47 +641,22 @@ export default function ParfumAI() {
             </div>
             
             <div className="flex items-center gap-4">
-              {/* Storage Status */}
-              <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg">
-                {isAuthenticated ? (
-                  <>
-                    <Cloud className="w-4 h-4 text-green-600" />
-                    <span className="text-sm text-green-800">Cloud Sync</span>
-                  </>
-                ) : (
-                  <>
-                    <HardDrive className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm text-blue-800">Yerel</span>
-                  </>
-                )}
+              {/* User Info */}
+              <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg">
+                <User className="w-4 h-4 text-green-600" />
+                <span className="text-sm text-green-800 font-medium">
+                  Admin
+                </span>
               </div>
 
-              {/* Auth Buttons */}
-              {isAuthenticated ? (
-                <div className="flex items-center gap-3">
-                  <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg">
-                    <User className="w-4 h-4 text-green-600" />
-                    <span className="text-sm text-green-800 truncate max-w-32">
-                      {user?.email}
-                    </span>
-                  </div>
-                  <button
-                    onClick={signOut}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span className="hidden md:inline">Çıkış</span>
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden md:inline">Giriş Yap</span>
-                </button>
-              )}
+              {/* Logout Button */}
+              <button
+                onClick={signOut}
+                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden md:inline">Çıkış</span>
+              </button>
 
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -1198,16 +1174,6 @@ export default function ParfumAI() {
           </div>
         </div>
       )}
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onSuccess={() => {
-          setShowAuthModal(false)
-          // Veri yeniden yüklenecek otomatik olarak useParfumData hook'u ile
-        }}
-      />
     </div>
   );
 }

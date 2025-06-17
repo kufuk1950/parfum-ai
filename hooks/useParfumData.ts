@@ -29,50 +29,35 @@ export interface Recipe {
 export const useParfumData = () => {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([])
   const [customIngredients, setCustomIngredients] = useState<Ingredient[]>([])
   const [hiddenIngredients, setHiddenIngredients] = useState<string[]>([])
 
-  // Authentication durumunu dinle
+  // Check hardcoded authentication
+  const checkAuthentication = () => {
+    const authStatus = sessionStorage.getItem('parfum-auth')
+    return authStatus === 'authenticated'
+  }
+
+  // Initialize data
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const currentUser = await SupabaseAPI.getCurrentUser()
-        setUser(currentUser)
-        
-        if (currentUser) {
-          // Kullanıcı varsa Supabase'den yükle
-          await loadFromSupabase()
-          // LocalStorage'daki veriyi migrate et
-          await SupabaseAPI.migrateLocalData()
-        } else {
-          // Kullanıcı yoksa localStorage'dan yükle
-          loadFromLocalStorage()
-        }
-      } catch (error) {
-        console.error('Error checking user:', error)
-        loadFromLocalStorage()
-      } finally {
-        setIsLoading(false)
+    const initializeData = async () => {
+      setIsLoading(true)
+      
+      const authenticated = checkAuthentication()
+      setIsAuthenticated(authenticated)
+      
+      if (authenticated) {
+        // Simulate user for Supabase operations
+        setUser({ id: 'admin-user', email: 'admin@parfum.ai' })
+        await loadFromSupabase()
       }
+      
+      setIsLoading(false)
     }
 
-    checkUser()
-
-    // Auth state değişikliklerini dinle
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const currentUser = session?.user || null
-      setUser(currentUser)
-      
-      if (currentUser && event === 'SIGNED_IN') {
-        await loadFromSupabase()
-        await SupabaseAPI.migrateLocalData()
-      } else if (event === 'SIGNED_OUT') {
-        loadFromLocalStorage()
-      }
-    })
-
-    return () => subscription.unsubscribe()
+    initializeData()
   }, [])
 
   // Supabase'den veri yükle
@@ -92,51 +77,15 @@ export const useParfumData = () => {
     }
   }
 
-  // localStorage'dan veri yükle
-  const loadFromLocalStorage = () => {
-    try {
-      const savedRecipesData = localStorage.getItem('parfum-saved-recipes')
-      const savedCustomIngredients = localStorage.getItem('parfum-custom-ingredients')  
-      const savedHiddenDefaults = localStorage.getItem('parfum-hidden-defaults')
-
-      if (savedRecipesData) {
-        const parsedRecipes = JSON.parse(savedRecipesData).map((recipe: any) => ({
-          ...recipe,
-          createdAt: new Date(recipe.createdAt)
-        }))
-        setSavedRecipes(parsedRecipes)
-      }
-
-      if (savedCustomIngredients) {
-        setCustomIngredients(JSON.parse(savedCustomIngredients))
-      }
-
-      if (savedHiddenDefaults) {
-        setHiddenIngredients(JSON.parse(savedHiddenDefaults))
-      }
-    } catch (error) {
-      console.error('Error loading from localStorage:', error)
-    }
-  }
-
   // Reçete kaydetme
   const saveRecipe = async (recipe: Omit<Recipe, 'id' | 'createdAt'>) => {
     try {
-      if (user) {
-        // Supabase'e kaydet
-        const savedRecipe = await SupabaseAPI.saveRecipe(recipe)
-        setSavedRecipes(prev => [savedRecipe, ...prev])
-      } else {
-        // localStorage'a kaydet
-        const newRecipe: Recipe = {
-          id: Date.now().toString(),
-          ...recipe,
-          createdAt: new Date()
-        }
-        const updatedRecipes = [newRecipe, ...savedRecipes]
-        setSavedRecipes(updatedRecipes)
-        localStorage.setItem('parfum-saved-recipes', JSON.stringify(updatedRecipes))
+      if (!isAuthenticated) {
+        throw new Error('Authentication required')
       }
+      
+      const savedRecipe = await SupabaseAPI.saveRecipe(recipe)
+      setSavedRecipes(prev => [savedRecipe, ...prev])
     } catch (error) {
       console.error('Error saving recipe:', error)
       throw error
@@ -146,15 +95,11 @@ export const useParfumData = () => {
   // Reçete silme
   const deleteRecipe = async (recipeId: string) => {
     try {
-      if (user) {
-        // Supabase'den sil
-        await SupabaseAPI.deleteRecipe(recipeId)
-      } else {
-        // localStorage'dan sil
-        const updatedRecipes = savedRecipes.filter(recipe => recipe.id !== recipeId)
-        setSavedRecipes(updatedRecipes)
-        localStorage.setItem('parfum-saved-recipes', JSON.stringify(updatedRecipes))
+      if (!isAuthenticated) {
+        throw new Error('Authentication required')
       }
+      
+      await SupabaseAPI.deleteRecipe(recipeId)
       setSavedRecipes(prev => prev.filter(recipe => recipe.id !== recipeId))
     } catch (error) {
       console.error('Error deleting recipe:', error)
@@ -165,21 +110,12 @@ export const useParfumData = () => {
   // Özel malzeme ekleme
   const addCustomIngredient = async (ingredient: Omit<Ingredient, 'id'>) => {
     try {
-      if (user) {
-        // Supabase'e kaydet
-        const savedIngredient = await SupabaseAPI.saveCustomIngredient(ingredient)
-        setCustomIngredients(prev => [...prev, savedIngredient])
-      } else {
-        // localStorage'a kaydet
-        const newIngredient: Ingredient = {
-          id: `custom-${ingredient.type}-${Date.now()}`,
-          ...ingredient,
-          isCustom: true
-        }
-        const updatedIngredients = [...customIngredients, newIngredient]
-        setCustomIngredients(updatedIngredients)
-        localStorage.setItem('parfum-custom-ingredients', JSON.stringify(updatedIngredients))
+      if (!isAuthenticated) {
+        throw new Error('Authentication required')
       }
+      
+      const savedIngredient = await SupabaseAPI.saveCustomIngredient(ingredient)
+      setCustomIngredients(prev => [...prev, savedIngredient])
     } catch (error) {
       console.error('Error saving custom ingredient:', error)
       throw error
@@ -189,15 +125,11 @@ export const useParfumData = () => {
   // Özel malzeme silme
   const deleteCustomIngredient = async (ingredientId: string) => {
     try {
-      if (user) {
-        // Supabase'den sil
-        await SupabaseAPI.deleteCustomIngredient(ingredientId)
-      } else {
-        // localStorage'dan sil
-        const updatedIngredients = customIngredients.filter(ing => ing.id !== ingredientId)
-        setCustomIngredients(updatedIngredients)
-        localStorage.setItem('parfum-custom-ingredients', JSON.stringify(updatedIngredients))
+      if (!isAuthenticated) {
+        throw new Error('Authentication required')
       }
+      
+      await SupabaseAPI.deleteCustomIngredient(ingredientId)
       setCustomIngredients(prev => prev.filter(ing => ing.id !== ingredientId))
     } catch (error) {
       console.error('Error deleting custom ingredient:', error)
@@ -208,15 +140,11 @@ export const useParfumData = () => {
   // Default malzeme gizleme
   const hideDefaultIngredient = async (ingredientId: string) => {
     try {
-      if (user) {
-        // Supabase'e kaydet
-        await SupabaseAPI.hideDefaultIngredient(ingredientId)
-      } else {
-        // localStorage'a kaydet
-        const updatedHidden = [...hiddenIngredients, ingredientId]
-        setHiddenIngredients(updatedHidden)
-        localStorage.setItem('parfum-hidden-defaults', JSON.stringify(updatedHidden))
+      if (!isAuthenticated) {
+        throw new Error('Authentication required')
       }
+      
+      await SupabaseAPI.hideDefaultIngredient(ingredientId)
       setHiddenIngredients(prev => [...prev, ingredientId])
     } catch (error) {
       console.error('Error hiding ingredient:', error)
@@ -225,11 +153,27 @@ export const useParfumData = () => {
   }
 
   // Authentication fonksiyonları
+  const signIn = async (username: string, password: string) => {
+    // Hardcoded authentication
+    if (username === 'adminufuk' && password === 'Ufuk12345K') {
+      sessionStorage.setItem('parfum-auth', 'authenticated')
+      setIsAuthenticated(true)
+      setUser({ id: 'admin-user', email: 'admin@parfum.ai' })
+      await loadFromSupabase()
+      return { success: true }
+    } else {
+      return { success: false, error: 'Kullanıcı adı veya şifre hatalı!' }
+    }
+  }
+
   const signOut = async () => {
     try {
-      await SupabaseAPI.signOut()
-      // localStorage'a geri dön
-      loadFromLocalStorage()
+      sessionStorage.removeItem('parfum-auth')
+      setIsAuthenticated(false)
+      setUser(null)
+      setSavedRecipes([])
+      setCustomIngredients([])
+      setHiddenIngredients([])
     } catch (error) {
       console.error('Error signing out:', error)
     }
@@ -239,6 +183,7 @@ export const useParfumData = () => {
     // State
     user,
     isLoading,
+    isAuthenticated,
     savedRecipes,
     customIngredients,
     hiddenIngredients,
@@ -249,11 +194,11 @@ export const useParfumData = () => {
     addCustomIngredient,
     deleteCustomIngredient,
     hideDefaultIngredient,
+    signIn,
     signOut,
     
     // Utils
-    isAuthenticated: !!user,
     loadFromSupabase,
-    loadFromLocalStorage
+    checkAuthentication
   }
 } 
