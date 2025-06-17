@@ -107,6 +107,14 @@ export default function ParfumAI() {
   // Authentication state değişimlerini izle
   useEffect(() => {
     console.log('🔄 Auth state değişti:', { isAuthenticated, user: user?.email, isLoading, isClient });
+    
+    if (isAuthenticated && user && isClient && !isLoading) {
+      console.log('🎯 TÜM KOŞULLAR SAĞLANDI! Ana sayfaya geçmeliydik...')
+      console.log('   ✅ isAuthenticated:', isAuthenticated)
+      console.log('   ✅ user:', user.email)
+      console.log('   ✅ isClient:', isClient)
+      console.log('   ✅ !isLoading:', !isLoading)
+    }
   }, [isAuthenticated, user, isLoading, isClient]);
 
   // Loading state
@@ -144,10 +152,10 @@ export default function ParfumAI() {
           }} // No close option - login required
           onSuccess={() => {
             console.log('🎉 AuthModal onSuccess çağrıldı!')
-            console.log('📊 Current isAuthenticated:', isAuthenticated)
-            console.log('👤 Current user:', user)
-            console.log('🔄 State güncellemesi bekleniyor...')
-            // Authentication success handled by useParfumData hook
+            console.log('📊 onSuccess - isAuthenticated:', isAuthenticated)
+            console.log('👤 onSuccess - user:', user?.email)
+            console.log('⏰ State güncellemesi beklendiği için otomatik yönlendirme UseEffect ile olacak')
+            // State güncellemesi UseEffect ile izlenecek
           }}
         />
       </div>

@@ -62,6 +62,7 @@ export const useParfumData = () => {
 
   // Supabase'den veri yükle
   const loadFromSupabase = async () => {
+    console.log('📡 loadFromSupabase başladı...')
     try {
       const [recipes, ingredients, hidden] = await Promise.all([
         SupabaseAPI.getRecipes(),
@@ -69,11 +70,16 @@ export const useParfumData = () => {
         SupabaseAPI.getHiddenIngredients()
       ])
       
+      console.log('📡 Supabase data loaded:', recipes.length, 'recipes,', ingredients.length, 'ingredients,', hidden.length, 'hidden')
+      
       setSavedRecipes(recipes)
       setCustomIngredients(ingredients)
       setHiddenIngredients(hidden)
+      
+      console.log('📡 loadFromSupabase başarıyla tamamlandı!')
     } catch (error) {
-      console.error('Error loading from Supabase:', error)
+      console.error('📡 ERROR: loadFromSupabase hatası:', error)
+      // Don't throw, just log the error
     }
   }
 
@@ -217,6 +223,7 @@ export const useParfumData = () => {
         } else {
           console.log('✅ Kullanıcı bulundu, giriş başarılı:', signInData);
           
+          console.log('🚀 BAŞLIYORUM: State güncellemesi...')
           // Mevcut kullanıcı ile giriş başarılı
           sessionStorage.setItem('parfum-auth', 'authenticated');
           console.log('🔧 State güncelleniyor: isAuthenticated = true')
@@ -226,6 +233,7 @@ export const useParfumData = () => {
           console.log('🔧 Supabase data yükleniyor...')
           await loadFromSupabase();
           console.log('🔧 State güncellemesi tamamlandı!')
+          console.log('🎯 RETURN EDİYORUM: {success: true}')
           return { success: true };
         }
         
