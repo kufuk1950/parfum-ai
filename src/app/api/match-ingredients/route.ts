@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(req: NextRequest) {
   try {
     const { selectedEssences, availableIngredients, gender, season, dominantScent } = await req.json();
@@ -21,13 +17,19 @@ export async function POST(req: NextRequest) {
       explanation: "Demo hammade önerileri"
     };
 
-    // API anahtarı kontrolü
-    if (!process.env.OPENAI_API_KEY) {
-      console.log('OpenAI API anahtarı bulunamadı, fallback response döndürülüyor');
+    // GROQ API anahtarı kontrolü
+    if (!process.env.GROQ_API_KEY) {
+      console.log('GROQ API anahtarı bulunamadı, fallback response döndürülüyor');
       return NextResponse.json(fallbackResponse);
     }
 
     try {
+      // GROQ client'ı burada initialize et
+      const openai = new OpenAI({
+        apiKey: process.env.GROQ_API_KEY,
+        baseURL: 'https://api.groq.com/openai/v1',
+      });
+
       const essenceNames = selectedEssences.map((e: { name: string }) => e.name).join(', ');
       const availableNames = availableIngredients.map((i: { name: string }) => i.name).join(', ');
 
@@ -55,7 +57,7 @@ AÇIKLAMA: Neden bu hammadeleri önerdim
 Sadece mevcut hammadeler listesindeki isimleri kullan!`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "llama-3.1-8b-instant",
         messages: [
           {
             role: "system",
@@ -81,13 +83,13 @@ Sadece mevcut hammadeler listesindeki isimleri kullan!`;
       if (ingredientMatch) {
         recommendedIngredients = ingredientMatch[1]
           .split(',')
-          .map(item => item.trim().replace(/['"]/g, ''))
-          .filter(item => item.length > 0);
+          .map((item: string) => item.trim().replace(/['"]/g, ''))
+          .filter((item: string) => item.length > 0);
       }
 
       // Eğer format doğru değilse, fallback kullan
       if (recommendedIngredients.length === 0) {
-        console.log('OpenAI response formatı hatalı, fallback kullanılıyor');
+        console.log('GROQ response formatı hatalı, fallback kullanılıyor');
         return NextResponse.json(fallbackResponse);
       }
 
@@ -96,17 +98,17 @@ Sadece mevcut hammadeler listesindeki isimleri kullan!`;
         explanation: explanationMatch ? explanationMatch[1].trim() : 'Hammade önerileri hazırlandı'
       });
 
-    } catch (openaiError: unknown) {
-      console.error('OpenAI API hatası:', openaiError);
+    } catch (groqError: unknown) {
+      console.error('GROQ API hatası:', groqError);
       
       // Quota veya başka API hatası durumunda fallback döndür
-      const apiError = openaiError as { status?: number };
+      const apiError = groqError as { status?: number };
       if (apiError.status === 429 || apiError.status === 401) {
-        console.log('OpenAI quota aşıldı veya auth hatası, fallback response döndürülüyor');
+        console.log('GROQ quota aşıldı veya auth hatası, fallback response döndürülüyor');
         return NextResponse.json(fallbackResponse);
       }
       
-      throw openaiError;
+      throw groqError;
     }
 
   } catch (error) {

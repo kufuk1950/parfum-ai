@@ -112,18 +112,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // OpenAI API anahtarı kontrolü - debug
-    const apiKey = process.env.OPENAI_API_KEY;
-    console.log('API Key exists:', !!apiKey);
-    console.log('API Key length:', apiKey?.length || 0);
+    // GROQ API anahtarı kontrolü
+    const apiKey = process.env.GROQ_API_KEY;
+    console.log('GROQ API Key exists:', !!apiKey);
+    console.log('GROQ API Key length:', apiKey?.length || 0);
     
-    if (!apiKey || apiKey.trim() === '' || apiKey === 'your-openai-api-key-here') {
+    if (!apiKey || apiKey.trim() === '' || apiKey === 'your-groq-api-key-here') {
       return NextResponse.json({ recipe: generateDemoRecipe(ingredients, gender, season, dominantScent) });
     }
 
-    // OpenAI client'ı sadece API anahtarı varsa initialize et
+    // GROQ client'ı initialize et
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: 'https://api.groq.com/openai/v1',
     });
 
     // Malzeme listesini hazırla
@@ -241,7 +242,7 @@ Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Extrait kalitesinde pr
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "llama-3.1-8b-instant",
       messages: [
         {
           role: "system",
@@ -266,7 +267,7 @@ Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Extrait kalitesinde pr
     // Quota hatası veya diğer API hataları için demo reçete döndür
     const apiError = error as { status?: number; code?: string };
     if (apiError?.status === 429 || apiError?.code === 'insufficient_quota') {
-      console.log('OpenAI quota exceeded, returning demo recipe');
+      console.log('GROQ quota exceeded, returning demo recipe');
       return NextResponse.json({ 
         recipe: generateDemoRecipe(ingredients, gender, season, dominantScent)
       });
