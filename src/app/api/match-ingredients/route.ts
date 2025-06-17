@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+interface EssenceInput {
+  name: string;
+  type: string;
+  category?: string;
+}
+
+interface IngredientInput {
+  name: string;
+  type: string;
+  category?: string;
+}
+
 export async function POST(req: NextRequest) {
   console.log('🔍 Match Ingredients API çağrıldı');
   
@@ -8,7 +20,7 @@ export async function POST(req: NextRequest) {
     const { selectedEssences, availableIngredients, gender, season, dominantScent } = await req.json();
     
     console.log('📋 Request data:', {
-      selectedEssences: selectedEssences?.map((e: any) => e.name),
+      selectedEssences: selectedEssences?.map((e: EssenceInput) => e.name),
       availableIngredients: availableIngredients?.length,
       gender,
       season,
@@ -20,34 +32,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Esans seçimi gerekli' }, { status: 400 });
     }
 
-    // Akıllı fallback - seçilen esansa göre hammade öner
-    const createSmartFallback = (essences: any[]) => {
+    // Akıllı fallback - marka parfüm esanslarına göre hammade öner
+    const createSmartFallback = (essences: Array<{name: string}>) => {
       const essenceNames = essences.map(e => e.name.toLowerCase());
-      const availableHammades = availableIngredients.map((ing: any) => ing.name);
+      const availableHammades = availableIngredients.map((ing: {name: string}) => ing.name);
       
-      // Esans tipine göre uygun hammadeler
+      // Marka parfüm esanslarına göre uygun hammadeler
       const recommendations: string[] = [];
       
-      // Çiçeksi esanslar için
-      if (essenceNames.some(name => name.includes('gül') || name.includes('jasmine') || name.includes('lavanta'))) {
+      // Çiçeksi parfüm esansları için (Miss Dior, Chanel No5, vb.)
+      if (essenceNames.some(name => 
+        name.includes('dior') || name.includes('chanel') || name.includes('gül') || 
+        name.includes('jasmine') || name.includes('lavanta') || name.includes('çiçek')
+      )) {
         if (availableHammades.includes('Gül Yaprakları')) recommendations.push('Gül Yaprakları');
         if (availableHammades.includes('Jasmine Petalleri')) recommendations.push('Jasmine Petalleri');
         if (availableHammades.includes('Lavanta Çiçekleri')) recommendations.push('Lavanta Çiçekleri');
       }
       
-      // Odunsu esanslar için
-      if (essenceNames.some(name => name.includes('sandal') || name.includes('misk'))) {
+      // Odunsu/Oriental parfüm esansları için (Tom Ford, Yves Saint Laurent, vb.)
+      if (essenceNames.some(name => 
+        name.includes('tom ford') || name.includes('ysl') || name.includes('opium') || 
+        name.includes('sandal') || name.includes('misk') || name.includes('oud') || name.includes('oriental')
+      )) {
         if (availableHammades.includes('Sandal Ağacı')) recommendations.push('Sandal Ağacı');
         if (availableHammades.includes('Patchouli Yaprakları')) recommendations.push('Patchouli Yaprakları');
       }
       
-      // Narenciye esanslar için
-      if (essenceNames.some(name => name.includes('bergamot') || name.includes('limon'))) {
+      // Fresh/Sporty parfüm esansları için (Armani, Versace, vb.)
+      if (essenceNames.some(name => 
+        name.includes('armani') || name.includes('versace') || name.includes('fresh') || 
+        name.includes('bergamot') || name.includes('limon') || name.includes('sport')
+      )) {
         if (availableHammades.includes('Bergamot Kabuğu')) recommendations.push('Bergamot Kabuğu');
       }
       
-      // Baharat esanslar için
-      if (essenceNames.some(name => name.includes('vanilya'))) {
+      // Gourmand parfüm esansları için (Thierry Mugler, Jean Paul Gaultier, vb.)
+      if (essenceNames.some(name => 
+        name.includes('mugler') || name.includes('gaultier') || name.includes('euphoria') || 
+        name.includes('vanilya') || name.includes('chocolate') || name.includes('caramel')
+      )) {
         if (availableHammades.includes('Vanilya Çubuğu')) recommendations.push('Vanilya Çubuğu');
       }
       
@@ -64,25 +88,24 @@ export async function POST(req: NextRequest) {
       return recommendations.slice(0, 4); // Max 4 öneri
     };
 
-    // GROQ API anahtarı kontrolü
-    const apiKey = process.env.GROQ_API_KEY;
-    console.log('🔑 GROQ API Key exists:', !!apiKey);
-    console.log('🔑 GROQ API Key length:', apiKey?.length || 0);
+    // OpenAI API anahtarı kontrolü
+    const apiKey = process.env.OPENAI_API_KEY;
+    console.log('🔑 OpenAI API Key exists:', !!apiKey);
+    console.log('🔑 OpenAI API Key length:', apiKey?.length || 0);
     
-    if (!apiKey || apiKey.trim() === '' || apiKey === 'your-groq-api-key-here') {
-      console.log('❌ GROQ API anahtarı geçersiz, akıllı fallback kullanılıyor');
+    if (!apiKey || apiKey.trim() === '' || apiKey === 'your-openai-api-key-here') {
+      console.log('❌ OpenAI API anahtarı geçersiz, akıllı fallback kullanılıyor');
       const smartRecommendations = createSmartFallback(selectedEssences);
       return NextResponse.json({
         recommendedIngredients: smartRecommendations,
-        explanation: `Seçilen esanslarla uyumlu ${smartRecommendations.length} hammade önerisi (Demo mod)`
+        explanation: `Seçilen marka parfüm esanslarıyla uyumlu ${smartRecommendations.length} hammade önerisi (Demo mod)`
       });
     }
 
     try {
-      console.log('🤖 GROQ client oluşturuluyor...');
+      console.log('🤖 OpenAI client oluşturuluyor...');
       const openai = new OpenAI({
-        apiKey: process.env.GROQ_API_KEY,
-        baseURL: 'https://api.groq.com/openai/v1',
+        apiKey: process.env.OPENAI_API_KEY,
       });
 
       const essenceNames = selectedEssences.map((e: { name: string }) => e.name).join(', ');
@@ -91,9 +114,9 @@ export async function POST(req: NextRequest) {
       console.log('📝 Essences:', essenceNames);
       console.log('🌿 Available hammades:', availableNames);
 
-      const prompt = `Sen 20+ yıl deneyimli bir parfümör master'ısın. Seçilen esanslarla mükemmel uyum sağlayacak hammadeleri seçmen gerekiyor.
+      const prompt = `Sen 20+ yıl deneyimli bir master parfümör ve marka parfüm uzmanısın. Euphoria, Miss Dior, Tom Ford gibi marka parfümlerin kompozisyonlarını biliyorsun.
 
-SEÇILEN ESANSLAR: ${essenceNames}
+SEÇILEN MARKA PARFÜM ESANSLARI: ${essenceNames}
 
 MEVCUT HAMMADELER: ${availableNames}
 
@@ -102,29 +125,30 @@ TERCIHLER:
 - Mevsim: ${season}
 - Baskın Koku: ${dominantScent}
 
-PARFÜM KIMYA KURALLARI:
-1. Esanslar ile hammadeler arasında kimyasal uyum olmalı
-2. Seçilen esansların karakterini destekleyen hammadeler seç
-3. Top-Heart-Base nota piramidini destekle
-4. Cinsiyet karakteristiğini güçlendir
-5. Mevsim özelliklerini vurgula
+MARKA PARFÜM REVERSİNG KURALLARI:
+1. Seçilen marka parfüm esansının orijinal kompozisyonunu analiz et
+2. Bu parfümün karakterini oluşturan temel hammadeleri belirle
+3. Mevcut hammadeler listesinden en yakın alternatifleri seç
+4. Top-Heart-Base nota piramidini koruyarak hammade kombinasyonu öner
 
-ÖRNEK: Gül Esansı seçildiyse → Gül Yaprakları, Jasmine Petalleri gibi çiçeksi hammadeler seç
-ÖRNEK: Sandal Esansı seçildiyse → Sandal Ağacı, Patchouli Yaprakları gibi odunsu hammadeler seç
+ÖRNEK ANALİZ:
+- "Euphoria Esansı" → Gourmand, Oriental karakter → Vanilya Çubuğu, Patchouli Yaprakları öner
+- "Miss Dior Esansı" → Çiçeksi, Feminen → Gül Yaprakları, Jasmine Petalleri öner
+- "Tom Ford Esansı" → Odunsu, Maskülen → Sandal Ağacı, Patchouli Yaprakları öner
 
 ZORUNLU FORMAT:
 ÖNERILEN_HAMMADELER: [Hammade1, Hammade2, Hammade3, Hammade4]
-AÇIKLAMA: Neden bu hammadeleri seçtim?
+AÇIKLAMA: Seçilen marka parfümün karakterini yakalamak için bu hammadeleri seçtim çünkü...
 
 SADECE MEVCUT HAMMADELER LİSTESİNDEKİ İSİMLERİ KULLAN!`;
 
-      console.log('🚀 GROQ API çağrısı yapılıyor...');
+      console.log('🚀 OpenAI API çağrısı yapılıyor...');
       const completion = await openai.chat.completions.create({
-        model: "llama-3.1-8b-instant",
+        model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: "Sen 20+ yıl deneyimli master parfümörsün. Esans ve hammade eşleştirmelerinde uzmansın. Kimyasal uyum ve nota piramidi konusunda ekspersin."
+            content: "Sen 20+ yıl deneyimli master parfümörsün. Marka parfümlerin kompozisyonlarını analiz edip, hammade eşleştirmelerinde uzmansın. Parfüm reverse engineering konusunda ekspersin."
           },
           {
             role: "user",
@@ -135,9 +159,9 @@ SADECE MEVCUT HAMMADELER LİSTESİNDEKİ İSİMLERİ KULLAN!`;
         temperature: 0.6,
       });
 
-      console.log('✅ GROQ API yanıt aldı');
+      console.log('✅ OpenAI API yanıt aldı');
       const response = completion.choices[0]?.message?.content || '';
-      console.log('📝 GROQ response:', response);
+      console.log('📝 OpenAI response:', response);
       
       // Response'dan hammade listesini çıkar
       const ingredientMatch = response.match(/ÖNERILEN_HAMMADELER:\s*\[(.*?)\]/);
@@ -156,35 +180,35 @@ SADECE MEVCUT HAMMADELER LİSTESİNDEKİ İSİMLERİ KULLAN!`;
 
       // Eğer format doğru değilse, akıllı fallback kullan
       if (recommendedIngredients.length === 0) {
-        console.log('❌ GROQ response formatı hatalı, akıllı fallback kullanılıyor');
+        console.log('❌ OpenAI response formatı hatalı, akıllı fallback kullanılıyor');
         const smartRecommendations = createSmartFallback(selectedEssences);
         return NextResponse.json({
           recommendedIngredients: smartRecommendations,
-          explanation: `Seçilen esanslarla uyumlu ${smartRecommendations.length} hammade önerisi (Akıllı fallback)`
+          explanation: `Seçilen marka parfüm esanslarıyla uyumlu ${smartRecommendations.length} hammade önerisi (Akıllı fallback)`
         });
       }
 
       console.log('✅ Başarılı response döndürülüyor');
       return NextResponse.json({
         recommendedIngredients,
-        explanation: explanationMatch ? explanationMatch[1].trim() : 'Hammade önerileri AI tarafından hazırlandı'
+        explanation: explanationMatch ? explanationMatch[1].trim() : 'Marka parfüm esanslarına uygun hammade önerileri AI tarafından hazırlandı'
       });
 
-    } catch (groqError: unknown) {
-      console.error('💥 GROQ API hatası:', groqError);
+    } catch (openaiError: unknown) {
+      console.error('💥 OpenAI API hatası:', openaiError);
       
       // Quota veya başka API hatası durumunda akıllı fallback döndür
-      const apiError = groqError as { status?: number; code?: string };
+      const apiError = openaiError as { status?: number; code?: string };
       if (apiError.status === 429 || apiError.code === 'insufficient_quota') {
-        console.log('❌ GROQ quota aşıldı, akıllı fallback kullanılıyor');
+        console.log('❌ OpenAI quota aşıldı, akıllı fallback kullanılıyor');
         const smartRecommendations = createSmartFallback(selectedEssences);
         return NextResponse.json({
           recommendedIngredients: smartRecommendations,
-          explanation: `Seçilen esanslarla uyumlu ${smartRecommendations.length} hammade önerisi (Quota aşıldı)`
+          explanation: `Seçilen marka parfüm esanslarıyla uyumlu ${smartRecommendations.length} hammade önerisi (Quota aşıldı)`
         });
       }
       
-      throw groqError;
+      throw openaiError;
     }
 
   } catch (error) {

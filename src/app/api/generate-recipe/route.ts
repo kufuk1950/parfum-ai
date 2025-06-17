@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import OpenAI from 'openai';
 
 interface Ingredient {
   id: string;
@@ -41,34 +41,34 @@ function generateDemoRecipe(
 
 📋 MALZEME LİSTESİ VE ORANLAR:
 
-🌿 HAMMADELER (Top Notes - %30):
-${hammadeler.map(ing => `• ${ing.name} - 3ml`).join('\n') || '• Temel hammade bulunmuyor'}
-
-💧 ESANSLAR (Heart & Base Notes - %60):
+🌸 MARKA PARFÜM ESANSLARI (Heart & Base Notes - %60):
 ${esanslar.map(ing => `• ${ing.name} - 4ml`).join('\n') || '• Temel esans bulunmuyor'}
+
+🌿 DESTEKLEYICI HAMMADELER (Top Notes - %30):
+${hammadeler.map(ing => `• ${ing.name} - 3ml`).join('\n') || '• Temel hammade bulunmuyor'}
 
 🧪 ÇÖZÜCÜ (Base - %10):
 • Etil alkol (%96) - 25ml
 • Distile su - 5ml
 
-🔬 HAZIRLAMA ADIMLARİ:
+🔬 MARKA PARFÜM HAZIRLAMA ADIMLARİ:
 
 1. 📊 ÖLÇÜM AŞAMASI:
    - Tüm malzemeleri hassas terazide ölçün
    - Cam malzemeler kullanın (plastik kokular absorbe eder)
 
-2. 💫 KARIŞIM AŞAMASI:
-   - Önce esansları karıştırın (ağır kokular önce)
-   - Hammadeleri yavaşça ilave edin
+2. 💫 MARKA ESANS KARIŞIMI:
+   - Önce marka parfüm esanslarını karıştırın
+   - Destekleyici hammadeleri yavaşça ilave edin
    - Etil alkolü damla damla ekleyin
    - 5 dakika karıştırın
 
-3. 🕐 DİNLENDİRME:
+3. 🕐 OLGUNLAŞTIRMA:
    - Kapalı cam şişede 48 saat bekletin
    - Distile suyu son olarak ekleyin
    - Hafifçe çalkalayın
 
-💡 PROFESYONEL TAVSİYELER:
+💡 MARKA PARFÜM TAVSİYELERİ:
 
 • 🌡️ SICAKLIK: Oda sıcaklığında (18-22°C) çalışın
 • 🧼 HİJYEN: Tüm araçları önce alkolla temizleyin  
@@ -88,11 +88,11 @@ Bu reçete ${genderChars[gender]} karakterde, ${season} mevsimi için ${seasonCh
 
 ${dominantScent ? `🌟 Baskın koku profili: ${dominantScent}` : ''}
 🔢 Toplam malzeme sayısı: ${ingredients.length}
-⏱️ Kalıcılık: 6-8 saat
+⏱️ Kalıcılık: 6-8 saat  
 🌊 Sillaj: Orta seviye
 
-📝 NOT: Bu reçete deneyimli parfümörlerden esinlenerek hazırlanmıştır. 
-GROQ API sorunu nedeniyle demo versiyon gösterilmektedir.`;
+📝 NOT: Bu reçete marka parfüm esansları kullanılarak hazırlanmıştır. 
+OpenAI API sorunu nedeniyle demo versiyon gösterilmektedir.`;
 }
 
 export async function POST(request: NextRequest) {
@@ -115,20 +115,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // GROQ API anahtarı kontrolü
-    const apiKey = process.env.GROQ_API_KEY;
-    console.log('🔑 GROQ API Key exists:', !!apiKey);
-    console.log('🔑 GROQ API Key length:', apiKey?.length || 0);
+    // OpenAI API anahtarı kontrolü
+    const apiKey = process.env.OPENAI_API_KEY;
+    console.log('🔑 OpenAI API Key exists:', !!apiKey);
+    console.log('🔑 OpenAI API Key length:', apiKey?.length || 0);
     
-    if (!apiKey || apiKey.trim() === '' || apiKey === 'your-groq-api-key-here') {
-      console.log('❌ GROQ API Key invalid, returning demo recipe');
+    if (!apiKey || apiKey.trim() === '' || apiKey === 'your-openai-api-key-here') {
+      console.log('❌ OpenAI API Key invalid, returning demo recipe');
       return NextResponse.json({ recipe: generateDemoRecipe(ingredients, gender, season, dominantScent) });
     }
 
-    console.log('🤖 GROQ client oluşturuluyor...');
-    // GROQ client'ı initialize et
-    const groq = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
+    console.log('🤖 OpenAI client oluşturuluyor...');
+    // OpenAI client'ı initialize et
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
     // Malzeme listesini hazırla
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     const esanslar = ingredients.filter(ing => ing.type === 'esans').map(ing => ing.name);
 
     console.log('🌿 Hammadeler:', hammadeler.length, hammadeler);
-    console.log('💧 Esanslar:', esanslar.length, esanslar);
+    console.log('💧 Marka Parfüm Esansları:', esanslar.length, esanslar);
 
     // Mevsim özelliklerini belirle
     const seasonCharacteristics = {
@@ -153,11 +153,11 @@ export async function POST(request: NextRequest) {
       unisex: 'dengeli, modern, evrensel, sofistike'
     };
 
-    console.log('📋 Detaylı prompt hazırlanıyor...');
+    console.log('📋 Detaylı marka parfüm prompt hazırlanıyor...');
     const prompt = `
-Sen 20+ yıl deneyimli, uluslararası ödüllü bir parfümörsün. EXTRAIT DE PARFUM konsantrasyonunda (%20-40 esans oranı), yüksek yayılım ve uzun kalıcılık hedefleyen profesyonel bir reçete hazırlayacaksın.
+Sen 20+ yıl deneyimli, uluslararası ödüllü bir master parfümörsün ve marka parfüm reverse engineering uzmanısın. Euphoria, Miss Dior, Tom Ford gibi markaların kompozisyonlarını biliyorsun.
 
-PROJE DETAYLARI:
+MARKA PARFÜM PROJESI DETAYLARI:
 🎯 Hedef Kitle: ${gender}
 🌍 Mevsim: ${season} 
 🌸 Baskın Koku Profili: ${dominantScent}
@@ -165,99 +165,85 @@ PROJE DETAYLARI:
 🌿 Mevsim Özelliği: ${seasonCharacteristics[season]}
 
 MEVCUT MALZEME ENVANTERİ:
-${hammadeler.length > 0 ? `🌿 HAMMADELER: ${hammadeler.join(', ')}` : '🌿 HAMMADELER: Yok'}
-${esanslar.length > 0 ? `💧 ESANSLAR: ${esanslar.join(', ')}` : '💧 ESANSLAR: Yok'}
+${hammadeler.length > 0 ? `🌿 DESTEKLEYICI HAMMADELER: ${hammadeler.join(', ')}` : '🌿 HAMMADELER: Yok'}
+${esanslar.length > 0 ? `🌸 MARKA PARFÜM ESANSLARI: ${esanslar.join(', ')}` : '💧 ESANSLAR: Yok'}
 
-PARFÜM GEREKSİNİMLERİ:
+MARKA PARFÜM KLONLAMA GEREKSİNİMLERİ:
 - Konsantrasyon: EXTRAIT DE PARFUM (20-40% esans)
-- Toplam Hacim: 50ml (nihai ürün)
-- Kalıcılık: Minimum 12+ saat
+- Orijinal karakter korunmalı
+- Kalıcılık: Minimum 12+ saat (marka parfüm seviyesi)
 - Sillaj (Yayılım): Yüksek, 1-2 metre mesafe
-- Kalite: Nişe parfüm seviyesi
-- Bütçe: Premium segment
+- Kalite: Orijinal marka parfüme yakın seviye
 
-ZORUNLU TEKNIK GEREKSINIMLER:
-1. Tüm ölçümleri ML ve GRAM cinsinden ver
-2. Top-Heart-Base nota piramidini takip et
-3. Alkol bazını %96 etil alkol kullan
-4. Fiksatör olarak misk veya amber dahil et
-5. pH dengesi için distile su ekle
+MARKA PARFÜM REVERSİNG KURALLARI:
+1. Seçilen marka parfüm esanslarının orijinal kompozisyonunu analiz et
+2. Bu parfümlerin karakteristik özelliklerini koruyacak formülasyon yap
+3. Destekleyici hammadelerle orijinal nota piramidini destekle
+4. Top-Heart-Base yapısını marka parfümün orijinaline uygun kur
 
-Lütfen aşağıdaki profesyonel formatta DETAYLI reçete hazırla:
+Lütfen aşağıdaki profesyonel formatta MARKA PARFÜM KLONLAMA reçetesi hazırla:
 
-🏆 EXTRAIT PARFÜM REÇETESİ 🏆
+🏆 MARKA PARFÜM KLONU REÇETESİ 🏆
 
 📊 KONSANTRASYON ANALİZİ:
-• Esans Oranı: [%25-40 arası belirt]
-• Alkol Oranı: [%50-65 arası belirt]  
+• Marka Esans Oranı: [%25-40 arası belirt]
+• Hammade Destek Oranı: [%10-20 arası belirt]  
+• Alkol Oranı: [%40-60 arası belirt]
 • Su Oranı: [%5-15 arası belirt]
-• Fiksatör Oranı: [%3-8 arası belirt]
 
 📋 DETAYLI MALZEME LİSTESİ VE ÖLÇÜMLER:
 
 🔺 TOP NOTES (%20-30) - İlk 15 dakika:
-[Her malzemeyi ml/gram cinsinden, örnek: "Bergamot Esansı: 3.2ml"]
+[Her malzemeyi ml/gram cinsinden, marka parfümün üst notalarını yakalayacak şekilde]
 
 💖 HEART NOTES (%40-50) - 1-6 saat:
-[Her malzemeyi ml/gram cinsinden]
+[Marka parfüm esanslarını burada kullan, orijinal kalp notalarını koru]
 
 🏛️ BASE NOTES (%20-30) - 6+ saat:
-[Her malzemeyi ml/gram cinsinden]
+[Destekleyici hammadelerle marka parfümün dip notalarını güçlendir]
 
 🧪 ÇÖZÜCÜ VE SABITLEYICI:
 • Etil Alkol (96%): [X]ml
 • Distile Su: [X]ml
-• Fiksatör (misk/amber): [X]ml
+• Fiksatör: [X]ml
 
-🔬 PROFESYONEL HAZIRLAMA TEKNİĞİ:
+🔬 MARKA PARFÜM KLONLAMA TEKNİĞİ:
 
-ADIM 1 - Esans Karışımı:
-[Base notalardan başla, precise timing]
+ADIM 1 - Marka Esans Hazırlığı:
+[Marka parfüm esanslarının doğru oranlarla karıştırılması]
 
-ADIM 2 - Maserasyon:
-[Heart notları dahil et, süre belirt]
+ADIM 2 - Nota Piramidi Kurulumu:
+[Orijinal parfümün nota yapısını koruyacak hammade eklenmesi]
 
-ADIM 3 - Top Nota İlavesi:
-[En son, dikkatli karıştırma]
+ADIM 3 - Karakteristik Koruma:
+[Marka parfümün ayırt edici özelliklerinin yakalanması]
 
-ADIM 4 - Alkol Entegrasyonu:
-[Damla damla teknik, emülsiyon önleme]
+ADIM 4 - Olgunlaştırma:
+[Marka parfüm kalitesinde olgunlaştırma süreci]
 
-ADIM 5 - Dinlendirme:
-[Sıcaklık, zaman, ortam koşulları]
+💎 MASTER PARFÜMÖR MARKA KLONLAMA TAVSİYELERİ:
+[Seçilen marka parfümlerin karakteristiğini korumak için özel teknikler]
 
-💎 MASTER PARFÜMÖR TAVSİYELERİ:
-• Molecular binding için ultrasonik banyo kullan
-• Maturation için 4-8 hafta karanlık ortam
-• Spray test için minimum 72 saat bekle
-• [Diğer profesyonel ipuçları]
+📈 BEKLENEN MARKA PARFÜM PERFORMANSİ:
+🕐 Kalıcılık: Orijinale yakın performans
+📏 Sillaj: Marka parfüm seviyesi
+👃 Karakter Benzerliği: %85-95 oranında
 
-📈 PERFORMANS TAHMİNİ:
-🕐 Kalıcılık: [X saat]
-📏 Sillaj: [X metre]
-🌡️ Optimum uygulama sıcaklığı: [X°C]
-👃 Koku yoğunluğu: [1-10 arası]
+🎯 MARKA PARFÜM KARAKTER ANALİZİ:
+[Seçilen esansların hangi marka parfüm karakteristiklerini yansıttığı]
 
-🎯 FINAL PARFÜM PROFİLİ:
-[Detaylı koku evrimi, karakter analizi]
-
-⚠️ KALİTE KONTROL:
-• pH: 5.5-6.5 arası olmalı
-• Renk: [Beklenen renk]
-• Berraklık: [Bulanıklık kontrolü]
-
-Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Extrait kalitesinde profesyonel reçete hazırla.
+Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Marka parfüm kalitesinde profesyonel reçete hazırla.
 `;
 
-    console.log('🚀 GROQ API çağrısı yapılıyor...');
+    console.log('🚀 OpenAI API çağrısı yapılıyor...');
     
     try {
-      const completion = await groq.chat.completions.create({
-        model: "llama-3.1-8b-instant",
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: "Sen uzman bir parfümörsün. Türkçe olarak detaylı, profesyonel ve uygulanabilir parfüm reçeteleri hazırlıyorsun."
+            content: "Sen uzman bir parfümör ve marka parfüm reverse engineering uzmanısın. Türkçe olarak detaylı, profesyonel ve uygulanabilir marka parfüm klonlama reçeteleri hazırlıyorsun."
           },
           {
             role: "user",
@@ -265,21 +251,21 @@ Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Extrait kalitesinde pr
           }
         ],
         max_tokens: 3000,
-        temperature: 0.8,
+        temperature: 0.7,
       });
 
-      console.log('✅ GROQ API yanıt aldı');
+      console.log('✅ OpenAI API yanıt aldı');
       const recipe = completion.choices[0]?.message?.content || 'Reçete üretilemedi, lütfen tekrar deneyin.';
       console.log('📏 Recipe length:', recipe.length);
 
       console.log('📤 Response gönderiliyor...');
       return NextResponse.json({ recipe });
       
-    } catch (groqApiError: unknown) {
-      console.error('💥 GROQ API Internal Error:', groqApiError);
+    } catch (openaiApiError: unknown) {
+      console.error('💥 OpenAI API Internal Error:', openaiApiError);
       
-      // GROQ API hatası durumunda demo reçete döndür
-      console.log('❌ GROQ API failed, returning demo recipe');
+      // OpenAI API hatası durumunda demo reçete döndür
+      console.log('❌ OpenAI API failed, returning demo recipe');
       return NextResponse.json({ 
         recipe: generateDemoRecipe(ingredients, gender, season, dominantScent)
       });
@@ -291,7 +277,7 @@ Türkçe yanıtla. Her ölçümü ML/GRAM olarak net ver. Extrait kalitesinde pr
     // Quota hatası veya diğer API hataları için demo reçete döndür
     const apiError = error as { status?: number; code?: string };
     if (apiError?.status === 429 || apiError?.code === 'insufficient_quota') {
-      console.log('❌ GROQ quota exceeded, returning demo recipe');
+      console.log('❌ OpenAI quota exceeded, returning demo recipe');
       return NextResponse.json({ 
         recipe: generateDemoRecipe(ingredients, gender, season, dominantScent)
       });
