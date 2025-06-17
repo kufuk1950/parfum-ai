@@ -68,28 +68,63 @@ ${hammadeler.map(ing => `• ${ing.name} - ${hammadePerItem}ml`).join('\n') || '
 🧪 ÇÖZÜCÜ:
 • Etil alkol (%96) - ${alcoholVolume}ml
 
-🔬 MARKA PARFÜM HAZIRLAMA ADIMLARİ:
+🔬 PROFESYONEL MANYETIK KARIŞTIRICI TEKNİĞİ:
 
-1. 📊 ÖLÇÜM AŞAMASI:
-   - Tüm malzemeleri hassas terazide ölçün
-   - Cam malzemeler kullanın
+HAZIRLIK:
+📐 Cam beher (${totalVolume + 20}ml kapasiteli)
+🧲 Manyetik çubuk (2-3cm boyunda)
+⚡ Manyetik karıştırıcı cihazı
+🌡️ Oda sıcaklığı (18-22°C)
 
-2. 💫 MARKA ESANS KARIŞIMI:
-   - Önce marka parfüm esanslarını karıştırın
-   - Destekleyici hammadeleri yavaşça ilave edin
-   - Etil alkolü damla damla ekleyin
-   - 5 dakika karıştırın
+ADIM 1 - BEHER HAZIRLIĞI (2 dakika):
+• Cam beheri ve manyetik çubuğu alkol ile temizleyin
+• Manyetik çubuğu beherin merkezine yerleştirin
+• Beheri manyetik karıştırıcının üzerine koyun
 
-3. 🕐 OLGUNLAŞTIRMA:
-   - Kapalı cam şişede 2-4 hafta bekletin
-   - Hafifçe çalkalayın
+ADIM 2 - MARKA ESANS EKLEME (3 dakika):
+• Manyetik karıştırıcıyı düşük hızda çalıştırın (200-300 RPM)
+• Marka parfüm esanslarını sırasıyla ekleyin:
+${esanslar.map(ing => `  → ${ing.name}: ${esansPerItem}ml`).join('\n') || '  → Esans eklenmedi'}
+• Her esans eklemesi arasında 30 saniye bekleyin
 
-💡 MARKA PARFÜM TAVSİYELERİ:
+ADIM 3 - HAMMADE ENTEGRASYONU (5 dakika):
+• Hızı 150-250 RPM'e düşürün (köpük oluşmasın)
+• Destekleyici hammadeleri yavaşça ekleyin:
+${hammadeler.map(ing => `  → ${ing.name}: ${hammadePerItem}ml`).join('\n') || '  → Hammade eklenmedi'}
+• 3-4 dakika karıştırın (berrak karışım için)
 
-• 🌡️ SICAKLIK: Oda sıcaklığında (18-22°C) çalışın
-• 🧼 HİJYEN: Tüm araçları önce alkolla temizleyin  
-• 🌞 IŞIK: Direkt güneş ışığından uzak tutun
-• 📦 SAKLAMA: Koyu renkli cam şişe kullanın
+ADIM 4 - ALKOL ENTEGRASYONu (8 dakika):
+• Hızı 100-200 RPM'e düşürün
+• Etil alkolü çok yavaş damla damla ekleyin (${alcoholVolume}ml)
+• 5-6 dakika karıştırın (emülsiyon önleme)
+• Karışım tamamen berrak olmalı
+
+ADIM 5 - SON KARIŞIM (5 dakika):
+• Hızı 300-400 RPM'e çıkarın
+• 3-4 dakika daha karıştırın
+• Son 1 dakika çok düşük hızda (100 RPM)
+
+⏱️ TOPLAM SÜRE: ~25 dakika
+🔄 TOPLAM RPM RANGE: 100-400 RPM
+
+📦 AKTARMA VE SAKLAMA:
+• Karıştırıcıyı durdurun ve manyetik çubuğu çıkarın
+• Parfümü koyu cam şişeye aktarın (huni kullanın)
+• Şişeyi sıkıca kapatın ve etiketleyin
+
+🕐 MASERASYON PROGRAMI:
+• 1. GÜN: Karışım tamamlandı
+• 3. GÜN: İlk dengeleme, hafifçe çalkalayın
+• 1. HAFTA: Nota birleşimi başlar
+• 2. HAFTA: %50 olgunluk
+• 4. HAFTA: Tam olgunluk (TEST ZAMANIN!)
+
+💡 MANYETIK KARIŞTIRIC TAVSİYELERİ:
+
+• 🚫 YÜKSEK HIZ KULLANMAYIN: Köpük ve oksidasyon yaratır
+• ⏰ ACELİ OLMAYIN: Yavaş karıştırma daha iyi sonuç verir
+• 🌡️ SICAKLIK KONTROLÜ: Soğuk ortamda çalışın
+• 🧲 MANYETİK ÇUBUK: Temiz ve pürüzsüz olmalı
 
 🎯 BEKLENİLEN SONUÇ:
 
@@ -100,8 +135,9 @@ ${dominantScent ? `🌟 Baskın koku profili: ${dominantScent}` : ''}
 ⏱️ Kalıcılık: 8-12 saat  
 🌊 Sillaj: Yüksek seviye
 📏 Toplam hacim: ${totalVolume}ml
+⚡ Karıştırma süresi: 25 dakika
 
-📝 NOT: Matematik %100 doğru - Su kullanılmıyor, sadece alkol çözücü!
+📝 NOT: Manyetik karıştırıcı ile profesyonel parfüm yapım tekniği!
 OpenAI API sorunu nedeniyle demo versiyon gösterilmektedir.`;
 }
 
@@ -222,19 +258,62 @@ Lütfen aşağıdaki profesyonel formatta MARKA PARFÜM KLONLAMA reçetesi hazı
 🧪 ÇÖZÜCÜ:
 • Etil Alkol (96%): ${perfumeVolume - Math.round(perfumeVolume * 0.25) - Math.round(perfumeVolume * 0.10)}ml
 
-🔬 MARKA PARFÜM KLONLAMA TEKNİĞİ:
+🔬 PROFESYONEL MANYETIK KARIŞTIRIC TEKNİĞİ:
 
-ADIM 1 - Marka Esans Hazırlığı:
-[Marka parfüm esanslarının doğru oranlarla karıştırılması]
+HAZIRLIK AŞAMASI:
+📐 Cam beher (${perfumeVolume + 20}ml kapasiteli)
+🧲 Manyetik çubuk (2-3cm boyunda)  
+⚡ Manyetik karıştırıcı cihazı
+🌡️ Oda sıcaklığı (18-22°C)
 
-ADIM 2 - Hammade Desteği:
-[Destekleyici hammadelerin eklenmesi]
+ADIM 1 - BEHER HAZIRLIĞI (2 dakika):
+• Cam beheri ve manyetik çubuğu %96 etil alkol ile sterilize edin
+• Manyetik çubuğu beherin tam merkezine yerleştirin
+• Beheri manyetik karıştırıcının üzerine dengeli koyun
 
-ADIM 3 - Alkol Entegrasyonu:
-[Etil alkolün dikkatli eklenmesi]
+ADIM 2 - MARKA ESANS KARIŞIMI (3-5 dakika):
+• Manyetik karıştırıcıyı düşük hızda başlatın (200-300 RPM)
+• Marka parfüm esanslarını belirtilen sırada ve miktarlarda ekleyin
+• Her esans ekleme arasında 30-45 saniye bekleyin
+• Homojen karışım oluşana kadar karıştırın
 
-ADIM 4 - Olgunlaştırma:
-[2-4 hafta olgunlaştırma süreci]
+ADIM 3 - HAMMADE ENTEGRASYONU (5-7 dakika):
+• Hızı 150-250 RPM'e düşürün (köpük oluşumunu önlemek için)
+• Destekleyici hammadeleri yavaş ve dikkatli ekleyin
+• 4-5 dakika karıştırın, karışım berrak olmalı
+• Hiçbir partikül veya tortu kalmamasına özen gösterin
+
+ADIM 4 - ALKOL ENTEGRASYONU (8-10 dakika):
+• Hızı 100-200 RPM'e düşürün (kritik aşama)
+• Etil alkolü çok yavaş, damla damla ekleyin
+• Toplam alkol miktarını 3 aşamada ekleyin
+• 6-7 dakika karıştırın, emülsiyon oluşumunu önleyin
+
+ADIM 5 - FİNAL KARIŞIM (5 dakika):
+• Hızı 300-400 RPM'e çıkarın
+• 3-4 dakika yüksek hızda karıştırın
+• Son 1 dakika çok düşük hızda (100 RPM) tamamlayın
+
+⏱️ TOPLAM KARIŞIM SÜRESİ: 23-29 dakika
+🔄 RPM ARALIKLARI: 100-400 RPM (aşamaya göre)
+
+AKTARMA VE SAKLAMA:
+• Manyetik karıştırıcıyı durdurun, manyetik çubuğu steril penset ile çıkarın
+• Parfümü huni kullanarak koyu amber cam şişeye aktarın
+• Şişeyi hava almayacak şekilde sıkıca kapatın
+• Üretim tarihini ve formülü etiketleyin
+
+MASERASYON TAKVİMİ:
+• 1-3 GÜN: İlk dengeleme periyodu
+• 1 HAFTA: Nota birleşimi başlar, hafifçe çalkalayın
+• 2 HAFTA: %50 olgunluk seviyesi
+• 4-6 HAFTA: Tam olgunluk (test için ideal)
+
+💡 MANYETIK KARIŞTIRIC TAVSİYELERİ:
+• 🚫 YÜKSEK HIZ KULLANMAYIN: Köpük ve oksidasyon yaratır
+• ⏰ ACELİ OLMAYIN: Yavaş karıştırma daha iyi sonuç verir
+• 🌡️ SICAKLIK KONTROLÜ: Soğuk ortamda çalışın
+• 🧲 MANYETİK ÇUBUK: Temiz ve pürüzsüz olmalı
 
 💎 MASTER PARFÜMÖR MARKA KLONLAMA TAVSİYELERİ:
 [Seçilen marka parfümlerin karakteristiğini korumak için özel teknikler]
